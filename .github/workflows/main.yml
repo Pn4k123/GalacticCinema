@@ -1,0 +1,36 @@
+name: 🚀 Deploy to Somee
+
+on:
+  push:
+    branches:
+      - master   # Chạy khi push lên nhánh main (bạn có thể đổi sang nhánh khác)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧩 Checkout source code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      # 3️⃣ Build và publish project
+      - name: 🏗️ Build and Publish
+        run: |
+          dotnet restore
+          dotnet build --configuration Release
+          dotnet publish --configuration Release --output ./publish
+
+      - name: 📤 Deploy via FTP to Somee
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: GalacticCinema.somee.com       # FTP host của bạn
+          username: Khuong          # Tên đăng nhập FTP (đặt trong GitHub Secrets)
+          password: K.khuong1470          # Mật khẩu FTP (đặt trong GitHub Secrets)
+          server-dir: www.GalacticCinema.somee.com/   # Thư mục chứa web trên Somee
+          local-dir: ./publish/                                 # Thư mục chứa file HTML cần upload
+          dangerous-clean-slate: false                   # Không xoá toàn bộ file cũ (để an toàn)

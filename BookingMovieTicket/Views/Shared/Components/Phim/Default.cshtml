@@ -1,0 +1,15 @@
+﻿@model IEnumerable<BookingMovieTicket.ViewModels.PhimVM>
+
+@foreach (var item in Model)
+{
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100 movie-card">
+                <img src="@item.Poster" class="card-img-top" alt="Mộ Đom Đóm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">@item.TenPhim</h5>
+                <p class="card-text text-muted small">120 phút | Hoạt Hình</p>
+                <a asp-controller="Home" asp-action="Phim" asp-route-loai="@item.MaPhim" class="btn btn-primary w-100">Mua Vé</a>
+            </div>
+        </div>
+    </div>
+}

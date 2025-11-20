@@ -1,0 +1,96 @@
+﻿@using BookingMovieTicket.Models
+@model BookingMovieTicket.Models.Phim
+@using BookingMovieTicket.ViewModels;
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+
+}
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+    <header class="bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="h2 fw-bold text-dark">Thêm phim mới</h2>
+        </div>
+    </header>
+    <br />
+    <div class="container">
+        <form asp-action="them" method="post" enctype="multipart/form-data" asp-area="Admin">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col">
+                    <label asp-for="MaPhim" class="form-label"></label>
+                    <input asp-for="MaPhim" class="form-control" />
+                    <span asp-validation-for="MaPhim" class="text-danger"></span>
+                </div>
+                <div class="col">
+                    <label asp-for="TenPhim" class="form-label"></label>
+                    <input asp-for="TenPhim" class="form-control" />
+                    <span asp-validation-for="TenPhim" class="text-danger"></span>
+                </div>
+            </div>
+         
+            <div class="form-group">
+                <label asp-for="MoTa" class="form-label"></label>
+                <textarea asp-for="MoTa" class="form-control"></textarea>
+                <span asp-validation-for="MoTa" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <label asp-for="ThoiLuong" class="form-label"></label>
+                    <input asp-for="ThoiLuong" class="form-control" />
+                    <span asp-validation-for="ThoiLuong" class="text-danger"></span>
+                </div>
+                <div class="col">
+                    <label asp-for="DaoDien" class="form-label"></label>
+                    <input asp-for="DaoDien" class="form-control" />
+                    <span asp-validation-for="DaoDien" class="text-danger"></span>
+            </div>
+            </div>
+            
+            <div class="row">
+                    <div class="col">
+                        <label asp-for="DanhGia" class="form-label"></label>
+                        <input asp-for="DanhGia" class="form-control" />
+                        <span asp-validation-for="DanhGia" class="text-danger"></span>
+                    </div>
+                    <div class="col">
+                        <label asp-for="NgayPhatHanh" class="form-label"></label>
+                        <input asp-for="NgayPhatHanh" type="date" class="form-control" />
+                        <span asp-validation-for="NgayPhatHanh" class="text-danger"></span>
+                    </div>
+            </div>
+            
+          
+            <div class="form-group">
+                <label asp-for="Trailer" class="form-label"></label>
+                <input asp-for="Trailer" class="form-control" />
+                <span asp-validation-for="Trailer" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ImageFile" class="form-label"></label>
+                <input asp-for="ImageFile" type="file"  class="form-control" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MaTheLoais" class="form-label"></label>
+                <select asp-for="MaTheLoais" asp-items="ViewBag.DSTheLoai" class="form-select" multiple></select>
+                <span asp-validation-for="MaTheLoais" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-3">
+                <input type="submit" class="btn btn-primary" value="Save" />
+            </div>
+            <div>
+                <a asp-action="Index">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
