@@ -1,20 +1,25 @@
-using System.Diagnostics;
 using BookingMovieTicket.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Diagnostics;
 
 namespace BookingMovieTicket.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly QuanLyDatVePhimContext db;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(QuanLyDatVePhimContext context)
         {
-            _logger = logger;
+           db = context;
         }
 
         public IActionResult Index()
         {
+            ViewBag.tenPhim = new Phim();
+            ViewBag.tenRap = new Rap();
+            ViewBag.DSPhim = new SelectList(db.Phims.ToList(), "MaPhim", "TenPhim");
+            ViewBag.DSRap = new SelectList(db.Raps.ToList(), "MaRap", "TenRap");
             return View();
         }
 

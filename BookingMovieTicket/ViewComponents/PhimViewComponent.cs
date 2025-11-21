@@ -28,6 +28,7 @@ namespace BookingTicket.ViewComponents
                 MaPhim = phim.MaPhim,
                 TenPhim = phim.TenPhim,
                 Poster = phim.Poster,
+                Trailer = phim.Trailer,
                 NgayPhatHanh = phim.NgayPhatHanh
             }).OrderByDescending(p=>p.NgayPhatHanh);
 

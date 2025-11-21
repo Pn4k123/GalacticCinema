@@ -1,4 +1,26 @@
-﻿<!DOCTYPE html>
+﻿@using BookingMovieTicket.ViewModels
+
+@{
+    QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
+    ViewBag.DSRap = db.Raps;
+
+    var phimsapchieu = db.Phims.Select(phim => new PhimVM
+    {
+        MaPhim = phim.MaPhim,
+        TenPhim = phim.TenPhim,
+        Poster = phim.Poster,
+        NgayPhatHanh = phim.NgayPhatHanh
+    }).Where(p => p.NgayPhatHanh > DateTime.Now).OrderByDescending(p => p.NgayPhatHanh).Take(4);
+
+    var phimdangchieu = db.Phims.Select(phim => new PhimVM
+    {
+        MaPhim = phim.MaPhim,
+        TenPhim = phim.TenPhim,
+        Poster = phim.Poster,
+        NgayPhatHanh = phim.NgayPhatHanh
+    }).Where(p => p.NgayPhatHanh <= DateTime.Now).OrderByDescending(p => p.NgayPhatHanh).Take(4);
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -8,48 +30,104 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BookingMovieTicket.styles.css" asp-append-version="true" />
+
+    <style>
+        .mega-dropdown:hover .mega-menu {
+            display: block !important;
+        }
+
+        /* Mega menu rộng */
+        .mega-menu {
+            width: 800px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 8px;
+        }
+
+        /* Fix Bootstrap auto close */
+        .mega-dropdown .dropdown-toggle::after {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-black border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light text-bg-light border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CINEMA</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GALACTIC CINEMA</a>
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item dropdown mega-dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownPhim" role="button">
+                                Phim
+                            </a>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Trang Chủ</a>
+                            <div class="dropdown-menu mega-menu p-3" aria-labelledby="navbarDropdownPhim">
+                                <div class="dropdown-item-text fw-bold text-md">Phim đang chiếu</div>
+                                <div class="row">
+                                    @foreach (var item in phimdangchieu)
+                                    {
+                                        <div class="col-3">
+                                            <div class="card h-100 movie-card position-relative overflow-hidden ">
+                                                <img src="@item.Poster" class="card-img-top" alt="@item.TenPhim">
+                                                <div class="card-body">
+                                                    <h5 class="card-title fw-bold">@item.TenPhim</h5>
+                                                    <div class="overlay d-flex flex-column justify-content-center align-items-center gap-2 position-absolute top-0 start-0 w-100 h-100">
+                                                        <a class="btn btn-warning px-4 fw-semibold">Mua vé</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+                                <hr class="dropdown-divider">
+                                <div class="dropdown-item-text fw-bold text-md">Phim sắp chiếu</div>
+                                <div class="row">
+                                    @foreach (var item in phimsapchieu)
+                                    {
+                                        <div class="col-3">
+                                            <div class="card h-100 movie-card position-relative overflow-hidden ">
+                                                <img src="@item.Poster" class="card-img-top" alt="@item.TenPhim">
+                                                <div class="card-body">
+                                                    <h5 class="card-title fw-bold">@item.TenPhim</h5>
+                                                    <div class="overlay d-flex flex-column justify-content-center align-items-center gap-2 position-absolute top-0 start-0 w-100 h-100">
+                                                        <a class="btn btn-warning px-4 fw-semibold">Mua vé</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    }
+                                </div>
+                            </div>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Phim">Phim</a>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-black" data-bs-toggle="dropdown">Rạp</a>
+                            <ul class="dropdown-menu">
+                                @foreach(var item in ViewBag.DSRap)
+                                {
+                                    <li><a class="dropdown-item">@item.TenRap</a></li>
+                                }
+   
+                            </ul>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="LichChieu">Lịch Chiếu</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Phim">Đang Chiếu</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Phim">Sắp Chiếu</a>
+                            <a class="nav-link text-black" href="#">Góc Điện Ảnh</a>
                         </li>
                     </ul>
 
-                    <ul class="navbar-nav navbar-expand-sm ms-auto">
-                        <li>
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Đăng Nhập</a>
-                        </li>
-                        <li>
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Đăng Ký</a>
-                        </li>
+                    <ul class="navbar-nav ms-auto">
+                        <li><a class="nav-link text-black">Đăng Nhập</a></li>
+                        <li><a class="nav-link text-black">Đăng Ký</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -65,6 +143,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,5 +1,8 @@
-﻿﻿@{
+﻿@using BookingMovieTicket.ViewModels
+@{
     ViewData["Title"] = "Trang Chủ";
+    Phim phim = ViewBag.tenPhim;
+    Rap rap = ViewBag.tenRap;
 }
 
 <section class="mb-5">
@@ -8,24 +11,17 @@
             <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
             <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
         </div>
-
         <div class="carousel-inner" style="border-radius: 10px;">
             <div class="carousel-item active">
-                <img src="~/hinhanh/cuc vang cua ngoai.jpg" class="d-block w-100" alt="Cục Vàng Của Ngoại">
-                @* <div class="carousel-caption d-none d-md-block text-white bg-dark bg-opacity-50 p-3 rounded">
-                    <h5>Cục Vàng Của Ngoại</h5>
-                    <p>Bộ phim tình cảm gia đình cảm động đang chiếu tại rạp.</p>
-                </div> *@
+                <img src="~/hinhanh/banner/2048-zalopay_1756202416336.png" class="d-block w-100" alt="">
             </div>
             <div class="carousel-item">
-                <img src="~/hinhanh//NHA MA XO.jpg" class="d-block w-100" alt="Nhà Ma Xó">
-                @* <div class="carousel-caption d-none d-md-block text-white bg-dark bg-opacity-50 p-3 rounded">
-                    <h5>Nhà Ma Xó</h5>
-                    <p>Gia Đình, Kinh Dị</p>
-                </div> *@
+                <img src="~/hinhanh/banner/lio-t9-galaxy-banner-app-2048x682_1758894535113.jpg" class="d-block w-100" alt="">
+            </div>
+            <div class="carousel-item">
+                <img src="~/hinhanh/banner/long-dien-huong-2048_1763019004777.jpg" class="d-block w-100" alt="">
             </div>
         </div>
-
         <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
@@ -36,22 +32,106 @@
         </button>
     </div>
 </section>
+
+<section class="mb-5 p-4 bg-light rounded shadow-sm">
+    <h3 class="text-center fw-bold mb-4">MUA VÉ NHANH</h3>
+    <form>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <select asp-for="@phim.TenPhim" asp-items="ViewBag.DSPhim" class="form-select" id="movieSelect" placeholder="Chọn phim">
+                    <option selected="selected">Chọn phim</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select asp-for="@rap.TenRap" asp-items="ViewBag.DSRap" class="form-select" id="cinemaSelect">
+                    <option selected="selected">Chọn rạp</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="dateSelect" class="form-label">Chọn Ngày</label>
+                <input type="date" class="form-control" id="dateSelect">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">Mua Vé</button>
+            </div>
+        </div>
+    </form>
+</section>
+
 <section class="mb-5">
-    <h2 class="display-5 fw-bold mb-4 border-bottom pb-2">
-        <a asp-controller="Home" asp-action="Phim" class="text-dark text-decoration-none">Phim Đang Chiếu</a>
-    </h2>
-    <div class="row g-4">
-        
-    @await Component.InvokeAsync("Phim",new { trangthai = "dangchieu"})
- 
+    <ul class="nav nav-tabs nav-pills nav-fill mb-3" id="movieTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="dang-chieu-tab" data-bs-toggle="tab" data-bs-target="#dang-chieu" type="button" role="tab" aria-controls="dang-chieu" aria-selected="true">Phim Đang Chiếu</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="sap-chieu-tab" data-bs-toggle="tab" data-bs-target="#sap-chieu" type="button" role="tab" aria-controls="sap-chieu" aria-selected="false">Phim Sắp Chiếu</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="movieTabsContent">
+        <div class="tab-pane fade show active" id="dang-chieu" role="tabpanel" aria-labelledby="dang-chieu-tab">
+            <div class="row g-4">
+                @await Component.InvokeAsync("Phim", new { trangthai = "dangchieu" })
+                
+
+            </div>
+        </div>
+        <div class="tab-pane fade" id="sap-chieu" role="tabpanel" aria-labelledby="sap-chieu-tab">
+            <div class="row g-4">
+                @await Component.InvokeAsync("Phim", new { trangthai = "sapchieu" })
+        </div>
+    </div>
     </div>
 </section>
-<section classs="mb-5">
-    <h2 class="display-5 fw-bold mb-4 border-bottom pb-2">
-        <a asp-controller="Home" asp-action="Phim" class="text-dark text-decoration-none">Phim Sắp Chiếu</a>
-    </h2>
 
+<section class="mb-5">
+    <h2 class="display-5 fw-bold mb-4 border-bottom pb-2">
+        <a href="#" class="text-dark text-decoration-none">Góc Điện Ảnh</a>
+    </h2>
     <div class="row g-4">
-        @await Component.InvokeAsync("Phim", new { trangthai = "sapchieu" })
+        <div class="col-md-4">
+            <div class="card">
+                <img src="~/hinhanh/blog/750_1762758603060.jpg" class="card-img-top" alt="Blog Post 1">
+                <div class="card-body">
+                    <h5 class="card-title">[Review] Predator Badlans: Sự Hồi Sinh Của Thương Hiệu Quái Thú Lừng Lẫy</h5>
+                    <a href="#" class="btn btn-outline-primary">Đọc thêm</a>
+                </div>
+            </div>
         </div>
+        <div class="col-md-4">
+            <div class="card">
+                <img src="~/hinhanh/blog/cuc-vang-cua-ngoai-3_1761022665126.jpg" class="card-img-top" alt="Blog Post 2">
+                <div class="card-body">
+                    <h5 class="card-title">[Review] Trái Tim Què Quặt: Hai Mối Tình Và Một Vụ Án Mạng</h5>
+                    <a href="#" class="btn btn-outline-primary">Đọc thêm</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <img src="~/hinhanh/blog/review-trai-tim-que-quat-hai-moi-tinh-va-mot-vu-an-mang-7_1762412640089.jpg" class="card-img-top" alt="Blog Post 3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        [Review] Cục Vàng Của Ngoại: Việt Hương - Hồng Đào Lấy Nước Mắt Khán Giả</h5>
+                    <a href="#" class="btn btn-outline-primary">Đọc thêm</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+
+<section class="mb-5">
+    <h2 class="display-5 fw-bold mb-4 border-bottom pb-2">
+        <a href="#" class="text-dark text-decoration-none">Tin Khuyến Mãi</a>
+    </h2>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <a href="#"><img src="~/hinhanh/khuyenmai/momo-galaxy-1_1756958473463.jpg" class="img-fluid rounded" alt="Khuyến mãi 1"></a>
+        </div>
+        <div class="col-md-6">
+            <a href="#"><img src="~/hinhanh/khuyenmai/zalopay-1_1756131251308.jpg" class="img-fluid rounded" alt="Khuyến mãi 2"></a>
+        </div>
+    </div>
+</section>
+
+

@@ -1,15 +1,67 @@
 ﻿@model IEnumerable<BookingMovieTicket.ViewModels.PhimVM>
+<style>
+    .movie-card .overlay {
+        background: rgba(0, 0, 0, 0.55);
+        opacity: 0;
+        transition: opacity .3s ease;
+    }
+
+    .movie-card:hover .overlay {
+        opacity: 1;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const trailerModal = document.getElementById('trailerModal');
+
+        // Lắng nghe khi modal được mở
+        trailerModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; // Nút được click
+            const videoUrl = button.getAttribute('data-video');
+            const iframe = document.getElementById('trailerFrame');
+            iframe.src = videoUrl + "?autoplay=1&mute=1";
+        });
+
+        // Lắng nghe khi modal được đóng
+        trailerModal.addEventListener('hidden.bs.modal', function () {
+            const iframe = document.getElementById('trailerFrame');
+            iframe.src = ""; // Dừng video
+        });
+    });
+</script>
+
+
+
+
 
 @foreach (var item in Model)
 {
     <div class="col-6 col-md-4 col-lg-3">
-        <div class="card h-100 movie-card">
-                <img src="@item.Poster" class="card-img-top" alt="Mộ Đom Đóm">
+        <div class="card h-100 movie-card position-relative overflow-hidden ">
+                <img src="@item.Poster" class="card-img-top" alt="@item.TenPhim">
                 <div class="card-body">
                     <h5 class="card-title fw-bold">@item.TenPhim</h5>
-                <p class="card-text text-muted small">120 phút | Hoạt Hình</p>
-                <a asp-controller="Home" asp-action="Phim" asp-route-loai="@item.MaPhim" class="btn btn-primary w-100">Mua Vé</a>
+                <div class="overlay d-flex flex-column justify-content-center align-items-center gap-2 position-absolute top-0 start-0 w-100 h-100">
+                    <a class="btn btn-warning px-4 fw-semibold">Mua vé</a>
+                    <a class="btn btn-outline-light px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#trailerModal"
+                       data-video="@item.Trailer.Replace("youtu.be/", "www.youtube.com/embed/")">Trailer</a>
+                </div>
             </div>
         </div>
     </div>
 }
+
+<div class="modal fade" id="trailerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark">
+            <div class="modal-body p-0 position-relative">
+
+                <div class="ratio ratio-16x9">
+                    <iframe id="trailerFrame" src="" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
