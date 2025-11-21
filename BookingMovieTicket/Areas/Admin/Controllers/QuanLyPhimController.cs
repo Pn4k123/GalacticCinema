@@ -64,7 +64,7 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
 
                 string extension = Path.GetExtension(phim.ImageFile.FileName);
 
-                string uniqueFileName = Guid.NewGuid().ToString() + extension;
+                string uniqueFileName = Guid.NewGuid().ToString() + phim.MaPhim + extension ;
 
                 string filePath = Path.Combine(uploadFolder, uniqueFileName);
 
