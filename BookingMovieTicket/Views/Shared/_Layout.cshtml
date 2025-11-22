@@ -1,4 +1,5 @@
 ﻿@using BookingMovieTicket.ViewModels
+@model BookingMovieTicket.Models.Phim
 
 @{
     QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
@@ -32,22 +33,7 @@
     <link rel="stylesheet" href="~/BookingMovieTicket.styles.css" asp-append-version="true" />
 
     <style>
-        .mega-dropdown:hover .mega-menu {
-            display: block !important;
-        }
-
-        /* Mega menu rộng */
-        .mega-menu {
-            width: 800px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 8px;
-        }
-
-        /* Fix Bootstrap auto close */
-        .mega-dropdown .dropdown-toggle::after {
-            display: none;
-        }
+        
     </style>
 </head>
 <body>
@@ -73,7 +59,7 @@
                                                 <div class="card-body">
                                                     <h5 class="card-title fw-bold">@item.TenPhim</h5>
                                                     <div class="overlay d-flex flex-column justify-content-center align-items-center gap-2 position-absolute top-0 start-0 w-100 h-100">
-                                                        <a class="btn btn-warning px-4 fw-semibold">Mua vé</a>
+                                                        <a asp-controller="Phim" asp-action="Index" asp-route-id="@item.MaPhim" class="btn btn-warning px-4 fw-semibold">Mua vé</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -92,7 +78,7 @@
                                                 <div class="card-body">
                                                     <h5 class="card-title fw-bold">@item.TenPhim</h5>
                                                     <div class="overlay d-flex flex-column justify-content-center align-items-center gap-2 position-absolute top-0 start-0 w-100 h-100">
-                                                        <a class="btn btn-warning px-4 fw-semibold">Mua vé</a>
+                                                        <a asp-controller="Phim" asp-action="Index" asp-route-id="@item.MaPhim" class="btn btn-warning px-4 fw-semibold">Mua vé</a>
                                                     </div>
                                                 </div>
                                             </div>

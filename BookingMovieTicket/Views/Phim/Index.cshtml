@@ -1,0 +1,190 @@
+﻿@using BookingMovieTicket.Models
+@model BookingMovieTicket.Models.Phim
+@{
+    QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
+    var tenPhim = Model.TenPhim;
+    ViewData["Title"] = "Đặt vé phim " + tenPhim;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var phimNoibat = db.Phims.Select(p => new { p.MaPhim, p.TenPhim, p.Poster }).Where(p => p.MaPhim != Model.MaPhim).Take(2);
+}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const trailerModal = document.getElementById('trailerModal');
+
+        // Lắng nghe khi modal được mở
+        trailerModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; // Nút được click
+            const videoUrl = button.getAttribute('data-video');
+            const iframe = document.getElementById('trailerFrame');
+            iframe.src = videoUrl + "?autoplay=1&mute=1";
+        });
+
+        // Lắng nghe khi modal được đóng
+        trailerModal.addEventListener('hidden.bs.modal', function () {
+            const iframe = document.getElementById('trailerFrame');
+            iframe.src = ""; // Dừng video
+        });
+    });
+</script>
+
+<div class="movie-detail-hero bg-dark text-white py-5" style="background: linear-gradient(to right, #000000, #434343);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-4 col-lg-3 text-center mb-4 mb-md-0">
+                <div class="position-relative shadow-lg rounded overflow-hidden">
+                    <img src="@Model.Poster" alt="Poster Phim" class="img-fluid w-100" style="object-fit: cover; max-height: 450px;">
+
+                    <a class="btn btn-danger position-absolute top-50 start-50 translate-middle rounded-circle" data-bs-toggle="modal" data-bs-target="#trailerModal"
+                       data-video="@Model.Trailer.Replace("youtu.be/", "www.youtube.com/embed/")" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-play-fill" style="font-size: 30px;">▶</i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-8 col-lg-9">
+                <h1 class="display-4 fw-bold mb-2">@Model.TenPhim</h1> <p class="text-warning fs-5">★ @Model.DanhGia / 10</p>
+
+                <div class="mb-4">
+                    <span class="badge bg-warning text-dark me-2">T16</span>
+                    <br />
+                 
+                    <h3>
+                        Thời lượng:
+                        <span class="badge bg-secondary me-2 ">@Model.ThoiLuong Phút</span>
+                    </h3>
+                    <br />
+
+                    <h3>
+                        Thể loại:
+                        @foreach (var item in ViewBag.DSTheLoai)
+                        {
+                            <span class="badge bg-secondary">@item.TenTheLoai</span>
+                        }
+                    </h3>
+                     <br />
+                </div>
+
+                <div class="row mb-4 fs-6">
+                    <div class="col-md-6">
+                        <p><strong>Đạo diễn:</strong> @Model.DaoDien</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Khởi chiếu:</strong> @(Model.NgayPhatHanh.HasValue? Model.NgayPhatHanh.Value.ToShortDateString() : "")</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <a href="#lich-chieu" class="btn btn-primary btn-lg px-4 fw-bold">Mua Vé Ngay</a>
+                    <button class="btn btn-outline-light btn-lg px-4" data-bs-toggle="modal" data-bs-target="#trailerModal"
+                            data-video="@Model.Trailer.Replace("youtu.be/", "www.youtube.com/embed/")">
+                        Xem Trailer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="trailerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark">
+            <div class="modal-body p-0 position-relative">
+
+                <div class="ratio ratio-16x9">
+                    <iframe id="trailerFrame" src="" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <section class="mb-5">
+                <h3 class="border-start border-4 border-primary ps-3 mb-3">Nội Dung Phim</h3>
+                <p class="lead text-secondary">
+                    @Model.MoTa
+                </p>
+            </section>
+
+            <section id="lich-chieu" class="mb-5">
+                <h3 class="border-start border-4 border-primary ps-3 mb-4">Lịch Chiếu</h3>
+
+                <ul class="nav nav-pills mb-4 gap-2" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-center" style="min-width: 80px;">
+                            <div class="fw-bold">20/11</div>
+                            <small>Hôm nay</small>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-center border" style="min-width: 80px;">
+                            <div class="fw-bold">21/11</div>
+                            <small>Thứ 5</small>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-center border" style="min-width: 80px;">
+                            <div class="fw-bold">22/11</div>
+                            <small>Thứ 6</small>
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Galaxy Nguyễn Du</h5>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a href="#" class="btn btn-outline-dark py-2 px-3">
+                                <div class="fw-bold">18:30</div>
+                                <small class="text-muted">2D Phụ đề</small>
+                            </a>
+                            <a href="#" class="btn btn-outline-dark py-2 px-3">
+                                <div class="fw-bold">20:15</div>
+                                <small class="text-muted">2D Phụ đề</small>
+                            </a>
+                            <a href="#" class="btn btn-outline-dark py-2 px-3">
+                                <div class="fw-bold">22:00</div>
+                                <small class="text-muted">2D Lồng tiếng</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Galaxy Tân Bình</h5>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a href="#" class="btn btn-outline-dark py-2 px-3">
+                                <div class="fw-bold">19:00</div>
+                                <small class="text-muted">2D Phụ đề</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <div class="col-lg-4">
+            <h4 class="mb-4">Phim Đang Hot</h4>
+            <div class="list-group">
+                @{
+                    foreach(var item in phimNoibat)
+                    {
+                        <a asp-action="Index" asp-route-id="@item.MaPhim" class="list-group-item list-group-item-action d-flex gap-3 py-3 border-0" aria-current="true">
+                            <img src="@item.Poster" alt="Twisters" width="60" height="80" class="rounded object-fit-cover">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div>
+                                    <h6 class="mb-1 fw-bold">@item.TenPhim</h6>
+                                </div>
+                            </div>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
