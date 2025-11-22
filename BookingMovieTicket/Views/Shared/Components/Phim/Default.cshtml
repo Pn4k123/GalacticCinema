@@ -32,9 +32,6 @@
 </script>
 
 
-
-
-
 @foreach (var item in Model)
 {
     <div class="col-6 col-md-4 col-lg-3">
@@ -43,7 +40,7 @@
                 <div class="card-body">
                     <h5 class="card-title fw-bold">@item.TenPhim</h5>
                 <div class="overlay d-flex flex-column justify-content-center align-items-center gap-2 position-absolute top-0 start-0 w-100 h-100">
-                    <a class="btn btn-warning px-4 fw-semibold">Mua vé</a>
+                    <a asp-controller="Phim" asp-action="Index" asp-route-id="@item.MaPhim" class="btn btn-warning px-4 fw-semibold">Mua vé</a>
                     <a class="btn btn-outline-light px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#trailerModal"
                        data-video="@item.Trailer.Replace("youtu.be/", "www.youtube.com/embed/")">Trailer</a>
                 </div>

@@ -46,3 +46,20 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+.mega-dropdown:hover .mega-menu {
+    display: block !important;
+}
+
+/* Mega menu rộng */
+.mega-menu {
+    width: 800px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 8px;
+}
+
+/* Fix Bootstrap auto close */
+.mega-dropdown .dropdown-toggle::after {
+    display: none;
+}
