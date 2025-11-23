@@ -7,11 +7,13 @@ public partial class ThanhToan
 {
     public string MaThanhToan { get; set; } = null!;
 
+    public string MaDon { get; set; } = null!;
+
     public string PhuongThuc { get; set; } = null!;
 
     public DateTime ThoiGian { get; set; }
 
-    public string TrangThai { get; set; } = null!;
+    public string? TrangThai { get; set; }
 
-    public virtual ICollection<DonDatVe> DonDatVes { get; set; } = new List<DonDatVe>();
+    public virtual DonDatVe MaDonNavigation { get; set; } = null!;
 }

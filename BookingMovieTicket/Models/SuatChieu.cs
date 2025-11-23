@@ -9,11 +9,15 @@ public partial class SuatChieu
 
     public string MaPhong { get; set; } = null!;
 
+    public string MaPhim { get; set; } = null!;
+
     public DateOnly NgayChieu { get; set; }
 
     public TimeOnly GioChieu { get; set; }
 
-    public string TrangThai { get; set; } = null!;
+    public string? TrangThai { get; set; }
+
+    public virtual Phim MaPhimNavigation { get; set; } = null!;
 
     public virtual Phong MaPhongNavigation { get; set; } = null!;
 

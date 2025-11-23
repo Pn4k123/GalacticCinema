@@ -45,7 +45,7 @@ public partial class QuanLyDatVePhimContext : DbContext
     {
         modelBuilder.Entity<ChiTietDonDatVe>(entity =>
         {
-            entity.HasKey(e => new { e.MaDon, e.MaVe }).HasName("PK__ChiTietD__DFFBA46806DE897A");
+            entity.HasKey(e => new { e.MaDon, e.MaVe }).HasName("PK__ChiTietD__DFFBA46841C40E2E");
 
             entity.ToTable("ChiTietDonDatVe");
 
@@ -60,17 +60,17 @@ public partial class QuanLyDatVePhimContext : DbContext
             entity.HasOne(d => d.MaDonNavigation).WithMany(p => p.ChiTietDonDatVes)
                 .HasForeignKey(d => d.MaDon)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ChiTietDo__MaDon__656C112C");
+                .HasConstraintName("FK__ChiTietDo__MaDon__60A75C0F");
 
             entity.HasOne(d => d.MaVeNavigation).WithMany(p => p.ChiTietDonDatVes)
                 .HasForeignKey(d => d.MaVe)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ChiTietDon__MaVe__66603565");
+                .HasConstraintName("FK__ChiTietDon__MaVe__619B8048");
         });
 
         modelBuilder.Entity<DonDatVe>(entity =>
         {
-            entity.HasKey(e => e.MaDon).HasName("PK__DonDatVe__3D89F568681024C0");
+            entity.HasKey(e => e.MaDon).HasName("PK__DonDatVe__3D89F568A65F3484");
 
             entity.ToTable("DonDatVe");
 
@@ -81,9 +81,6 @@ public partial class QuanLyDatVePhimContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false)
                 .HasColumnName("MaND");
-            entity.Property(e => e.MaThanhToan)
-                .HasMaxLength(10)
-                .IsUnicode(false);
             entity.Property(e => e.ThoiGianDat)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
@@ -93,17 +90,12 @@ public partial class QuanLyDatVePhimContext : DbContext
             entity.HasOne(d => d.MaNdNavigation).WithMany(p => p.DonDatVes)
                 .HasForeignKey(d => d.MaNd)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DonDatVe__MaND__403A8C7D");
-
-            entity.HasOne(d => d.MaThanhToanNavigation).WithMany(p => p.DonDatVes)
-                .HasForeignKey(d => d.MaThanhToan)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DonDatVe__MaThan__412EB0B6");
+                .HasConstraintName("FK__DonDatVe__MaND__3D5E1FD2");
         });
 
         modelBuilder.Entity<Ghe>(entity =>
         {
-            entity.HasKey(e => e.MaGhe).HasName("PK__Ghe__3CD3C67B6D0872F1");
+            entity.HasKey(e => e.MaGhe).HasName("PK__Ghe__3CD3C67BFEA7140C");
 
             entity.ToTable("Ghe");
 
@@ -114,17 +106,17 @@ public partial class QuanLyDatVePhimContext : DbContext
             entity.Property(e => e.MaPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.TrangThai).HasMaxLength(20);
+            entity.Property(e => e.TenGhe).HasMaxLength(10);
 
             entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.Ghes)
                 .HasForeignKey(d => d.MaPhong)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Ghe__MaPhong__4CA06362");
+                .HasConstraintName("FK__Ghe__MaPhong__4BAC3F29");
         });
 
         modelBuilder.Entity<NguoiDung>(entity =>
         {
-            entity.HasKey(e => e.MaNd).HasName("PK__NguoiDun__2725D724AC58DEA0");
+            entity.HasKey(e => e.MaNd).HasName("PK__NguoiDun__2725D724C7E406CE");
 
             entity.ToTable("NguoiDung");
 
@@ -150,7 +142,7 @@ public partial class QuanLyDatVePhimContext : DbContext
 
         modelBuilder.Entity<Phim>(entity =>
         {
-            entity.HasKey(e => e.MaPhim).HasName("PK__Phim__4AC03DE3D2935958");
+            entity.HasKey(e => e.MaPhim).HasName("PK__Phim__4AC03DE34859E330");
 
             entity.ToTable("Phim");
 
@@ -159,7 +151,6 @@ public partial class QuanLyDatVePhimContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.DanhGia).HasMaxLength(50);
             entity.Property(e => e.DaoDien).HasMaxLength(100);
-            entity.Property(e => e.NgayPhatHanh).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Poster).HasMaxLength(100);
             entity.Property(e => e.TenPhim).HasMaxLength(200);
             entity.Property(e => e.Trailer).HasMaxLength(500);
@@ -170,14 +161,14 @@ public partial class QuanLyDatVePhimContext : DbContext
                     r => r.HasOne<TheLoai>().WithMany()
                         .HasForeignKey("MaTheLoai")
                         .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__TheLoai_P__MaThe__5535A963"),
+                        .HasConstraintName("FK__TheLoai_P__MaThe__534D60F1"),
                     l => l.HasOne<Phim>().WithMany()
                         .HasForeignKey("MaPhim")
                         .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__TheLoai_P__MaPhi__5441852A"),
+                        .HasConstraintName("FK__TheLoai_P__MaPhi__52593CB8"),
                     j =>
                     {
-                        j.HasKey("MaPhim", "MaTheLoai").HasName("PK__TheLoai___F7B3C2D7953BFAA4");
+                        j.HasKey("MaPhim", "MaTheLoai").HasName("PK__TheLoai___F7B3C2D7D22282F6");
                         j.ToTable("TheLoai_Phim");
                         j.IndexerProperty<string>("MaPhim")
                             .HasMaxLength(10)
@@ -190,7 +181,7 @@ public partial class QuanLyDatVePhimContext : DbContext
 
         modelBuilder.Entity<Phong>(entity =>
         {
-            entity.HasKey(e => e.MaPhong).HasName("PK__Phong__20BD5E5B981B891E");
+            entity.HasKey(e => e.MaPhong).HasName("PK__Phong__20BD5E5BB175588F");
 
             entity.ToTable("Phong");
 
@@ -200,9 +191,7 @@ public partial class QuanLyDatVePhimContext : DbContext
             entity.Property(e => e.MaRap)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.SoPhong)
-                .HasMaxLength(50)
-                .IsUnicode(false);
+            entity.Property(e => e.TenPhong).HasMaxLength(50);
             entity.Property(e => e.TrangThai).HasMaxLength(20);
 
             entity.HasOne(d => d.MaRapNavigation).WithMany(p => p.Phongs)
@@ -213,7 +202,7 @@ public partial class QuanLyDatVePhimContext : DbContext
 
         modelBuilder.Entity<Rap>(entity =>
         {
-            entity.HasKey(e => e.MaRap).HasName("PK__Rap__3961207FF20B915E");
+            entity.HasKey(e => e.MaRap).HasName("PK__Rap__3961207F622ED15E");
 
             entity.ToTable("Rap");
 
@@ -227,43 +216,57 @@ public partial class QuanLyDatVePhimContext : DbContext
 
         modelBuilder.Entity<SuatChieu>(entity =>
         {
-            entity.HasKey(e => e.MaSuatChieu).HasName("PK__SuatChie__CF5984D205AC6EB1");
+            entity.HasKey(e => e.MaSuatChieu).HasName("PK__SuatChie__CF5984D2838D40BA");
 
             entity.ToTable("SuatChieu");
 
             entity.Property(e => e.MaSuatChieu)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.GioChieu).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.MaPhim)
+                .HasMaxLength(10)
+                .IsUnicode(false);
             entity.Property(e => e.MaPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.NgayChieu).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.TrangThai).HasMaxLength(20);
+
+            entity.HasOne(d => d.MaPhimNavigation).WithMany(p => p.SuatChieus)
+                .HasForeignKey(d => d.MaPhim)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__SuatChieu__MaPhi__5812160E");
 
             entity.HasOne(d => d.MaPhongNavigation).WithMany(p => p.SuatChieus)
                 .HasForeignKey(d => d.MaPhong)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__SuatChieu__MaPho__5AEE82B9");
+                .HasConstraintName("FK__SuatChieu__MaPho__571DF1D5");
         });
 
         modelBuilder.Entity<ThanhToan>(entity =>
         {
-            entity.HasKey(e => e.MaThanhToan).HasName("PK__ThanhToa__D4B258442838FD08");
+            entity.HasKey(e => e.MaThanhToan).HasName("PK__ThanhToa__D4B25844FE4CE700");
 
             entity.ToTable("ThanhToan");
 
             entity.Property(e => e.MaThanhToan)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            entity.Property(e => e.MaDon)
+                .HasMaxLength(10)
+                .IsUnicode(false);
             entity.Property(e => e.PhuongThuc).HasMaxLength(100);
             entity.Property(e => e.ThoiGian).HasColumnType("datetime");
             entity.Property(e => e.TrangThai).HasMaxLength(20);
+
+            entity.HasOne(d => d.MaDonNavigation).WithMany(p => p.ThanhToans)
+                .HasForeignKey(d => d.MaDon)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__ThanhToan__MaDon__412EB0B6");
         });
 
         modelBuilder.Entity<TheLoai>(entity =>
         {
-            entity.HasKey(e => e.MaTheLoai).HasName("PK__TheLoai__D73FF34AC39A8BE0");
+            entity.HasKey(e => e.MaTheLoai).HasName("PK__TheLoai__D73FF34A5D24F29C");
 
             entity.ToTable("TheLoai");
 
@@ -275,7 +278,7 @@ public partial class QuanLyDatVePhimContext : DbContext
 
         modelBuilder.Entity<Ve>(entity =>
         {
-            entity.HasKey(e => e.MaVe).HasName("PK__Ve__2725100FB4FAF5E0");
+            entity.HasKey(e => e.MaVe).HasName("PK__Ve__2725100F66FB89A4");
 
             entity.ToTable("Ve");
 
@@ -283,12 +286,6 @@ public partial class QuanLyDatVePhimContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.MaGhe)
-                .HasMaxLength(10)
-                .IsUnicode(false);
-            entity.Property(e => e.MaPhim)
-                .HasMaxLength(10)
-                .IsUnicode(false);
-            entity.Property(e => e.MaRap)
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.MaSuatChieu)
@@ -302,22 +299,12 @@ public partial class QuanLyDatVePhimContext : DbContext
             entity.HasOne(d => d.MaGheNavigation).WithMany(p => p.Ves)
                 .HasForeignKey(d => d.MaGhe)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Ve__MaGhe__628FA481");
-
-            entity.HasOne(d => d.MaPhimNavigation).WithMany(p => p.Ves)
-                .HasForeignKey(d => d.MaPhim)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Ve__MaPhim__5FB337D6");
-
-            entity.HasOne(d => d.MaRapNavigation).WithMany(p => p.Ves)
-                .HasForeignKey(d => d.MaRap)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Ve__MaRap__60A75C0F");
+                .HasConstraintName("FK__Ve__MaGhe__5DCAEF64");
 
             entity.HasOne(d => d.MaSuatChieuNavigation).WithMany(p => p.Ves)
                 .HasForeignKey(d => d.MaSuatChieu)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Ve__MaSuatChieu__619B8048");
+                .HasConstraintName("FK__Ve__MaSuatChieu__5CD6CB2B");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -5,28 +5,69 @@
     var tenPhim = Model.TenPhim;
     ViewData["Title"] = "Đặt vé phim " + tenPhim;
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var phimNoibat = db.Phims.Select(p => new { p.MaPhim, p.TenPhim, p.Poster }).Where(p => p.MaPhim != Model.MaPhim).Take(2);
+    var phimNoibat = db.Phims.Select(p => new { p.MaPhim, p.TenPhim, p.Poster }).Where(p => p.MaPhim != Model.MaPhim);
+    var ngayChieu = db.SuatChieus.Select(nc => nc.NgayChieu).Distinct().Take(7);
+    var rap = db.Raps.Select(r => new { r.MaRap, r.TenRap });
+    var selectedDate = ngayChieu.FirstOrDefault();
+
 }
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const trailerModal = document.getElementById('trailerModal');
 
-        // Lắng nghe khi modal được mở
+        
         trailerModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget; // Nút được click
+            const button = event.relatedTarget; 
             const videoUrl = button.getAttribute('data-video');
             const iframe = document.getElementById('trailerFrame');
             iframe.src = videoUrl + "?autoplay=1&mute=1";
         });
 
-        // Lắng nghe khi modal được đóng
+        
         trailerModal.addEventListener('hidden.bs.modal', function () {
             const iframe = document.getElementById('trailerFrame');
-            iframe.src = ""; // Dừng video
+            iframe.src = ""; 
         });
     });
+    //------------------------------------------------------//
+$(document).ready(function () {
+
+    $(".btn-ngay").on("click", function () {
+
+        $(".btn-ngay").removeClass("active");
+        $(this).addClass("active");
+
+        var selectedDate = $(this).data("date");
+        var maphim = "@Model.MaPhim";
+
+        $(".suatchieu-block").each(function () {
+
+            var rap = $(this).data("rap");
+            var block = $(this);
+
+            $.ajax({
+                url: "/SuatChieu/LoadByDate",
+                type: "GET",
+                data: {
+                    maphim: maphim,
+                    maRap: rap,
+                    ngay: selectedDate
+                },
+                success: function (html) {
+                    block.html(html);
+                }
+            });
+        });
+    });
+
+    $(".btn-ngay:first").click();
+});
+
+
+
 </script>
+
 
 <div class="movie-detail-hero bg-dark text-white py-5" style="background: linear-gradient(to right, #000000, #434343);">
     <div class="container">
@@ -113,57 +154,39 @@
                 <h3 class="border-start border-4 border-primary ps-3 mb-4">Lịch Chiếu</h3>
 
                 <ul class="nav nav-pills mb-4 gap-2" id="pills-tab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active text-center" style="min-width: 80px;">
-                            <div class="fw-bold">20/11</div>
-                            <small>Hôm nay</small>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link text-center border" style="min-width: 80px;">
-                            <div class="fw-bold">21/11</div>
-                            <small>Thứ 5</small>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link text-center border" style="min-width: 80px;">
-                            <div class="fw-bold">22/11</div>
-                            <small>Thứ 6</small>
-                        </button>
-                    </li>
+                    @foreach (var item in ngayChieu)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-center btn-ngay btn-ngay @(item == selectedDate ? "active" : "")"
+                                    data-date="@item.ToString("yyyy-MM-dd")"
+                                    style="min-width: 80px;">
+                                <div class="fw-bold">@item</div>
+                            </button>
+
+                        </li>
+                    }
+                    
                 </ul>
 
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold mb-3">Galaxy Nguyễn Du</h5>
-                        <div class="d-flex flex-wrap gap-3">
-                            <a href="#" class="btn btn-outline-dark py-2 px-3">
-                                <div class="fw-bold">18:30</div>
-                                <small class="text-muted">2D Phụ đề</small>
-                            </a>
-                            <a href="#" class="btn btn-outline-dark py-2 px-3">
-                                <div class="fw-bold">20:15</div>
-                                <small class="text-muted">2D Phụ đề</small>
-                            </a>
-                            <a href="#" class="btn btn-outline-dark py-2 px-3">
-                                <div class="fw-bold">22:00</div>
-                                <small class="text-muted">2D Lồng tiếng</small>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold mb-3">Galaxy Tân Bình</h5>
-                        <div class="d-flex flex-wrap gap-3">
-                            <a href="#" class="btn btn-outline-dark py-2 px-3">
-                                <div class="fw-bold">19:00</div>
-                                <small class="text-muted">2D Phụ đề</small>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                @foreach (var item in rap)
+                {
+                    <div class="card border-0 shadow-sm mb-3 rap-block">
+    <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">@item.TenRap</h5>
 
+        <div class="d-flex flex-wrap gap-3 suatchieu-block" data-rap="@item.MaRap">
+            @await Component.InvokeAsync("SuatChieu",
+                new {
+                    maphim = Model.MaPhim,
+                    maRap = item.MaRap,
+                    ngay = selectedDate
+                })
+        </div>
+    </div>
+</div>
+
+                }
+            
             </section>
         </div>
 

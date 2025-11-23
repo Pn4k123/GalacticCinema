@@ -9,11 +9,9 @@ public partial class Phong
 
     public string MaRap { get; set; } = null!;
 
-    public string SoPhong { get; set; } = null!;
+    public string TenPhong { get; set; } = null!;
 
-    public int TongSoGhe { get; set; }
-
-    public string TrangThai { get; set; } = null!;
+    public string? TrangThai { get; set; }
 
     public virtual ICollection<Ghe> Ghes { get; set; } = new List<Ghe>();
 
