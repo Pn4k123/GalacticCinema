@@ -11,9 +11,7 @@ public partial class Rap
 
     public string DiaChi { get; set; } = null!;
 
-    public string TrangThai { get; set; } = null!;
+    public string? TrangThai { get; set; }
 
     public virtual ICollection<Phong> Phongs { get; set; } = new List<Phong>();
-
-    public virtual ICollection<Ve> Ves { get; set; } = new List<Ve>();
 }
