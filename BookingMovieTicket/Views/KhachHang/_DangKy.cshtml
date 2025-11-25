@@ -1,0 +1,58 @@
+﻿@model BookingMovieTicket.ViewModels.DangKyVM
+@{
+    Layout = null;
+}
+
+<form asp-action="DangKy" method="post" id="formDangKy">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="HoTen" type="text" class="form-control rounded-3"  >
+        <label asp-for="HoTen"></label>
+        <span asp-validation-for="HoTen" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="Email" class="form-control rounded-3" >
+        <label asp-for="Email"></label>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="Sdt" type="tel" class="form-control rounded-3"  >
+        <label asp-for="Sdt">Số điện thoại</label>
+        <span asp-validation-for="Sdt" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="NgaySinh" type="date" class="form-control rounded-3">
+        <label asp-for="NgaySinh">Ngày sinh</label>
+    </div>
+
+    <div>
+        <label asp-for="GioiTinh">Nam</label>
+        <input asp-for="GioiTinh" type="radio" id="male"  value="1">
+
+        <label asp-for="GioiTinh">Nữ</label>
+        <input asp-for="GioiTinh" type="radio" id="female"  value="0">
+    </div>
+
+    <div class="form-floating mb-3">
+        <input class="form-control rounded-3" asp-for="MatKhau" type="password">
+        <label asp-for="MatKhau"></label>
+        <span asp-validation-for="MatKhau" class="text-danger"></span>
+    </div>
+
+
+    <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Đăng Ký</button>
+
+    <div class="text-center mt-3">
+        <span class="text-muted small">Đã có tài khoản?</span>
+        <a href="#" class="text-decoration-none fw-bold small" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập ngay</a>
+    </div>
+
+    <hr class="my-4">
+    <div class="text-center small text-muted">
+        Bằng cách đăng ký, bạn đồng ý với <a href="#">Điều khoản sử dụng</a> & <a href="#">Chính sách bảo mật</a> của chúng tôi.
+    </div>
+</form>

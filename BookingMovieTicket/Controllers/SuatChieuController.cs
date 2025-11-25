@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BookingMovieTicket.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Globalization;
 
@@ -6,17 +8,28 @@ namespace BookingMovieTicket.Controllers
 {
     public class SuatChieuController : Controller
     {
-        // Accept the date as a string from AJAX and parse to DateOnly
-        public IActionResult LoadByDate(string maphim, string maRap, string ngay)
+        QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
+        public IActionResult loadSuatChieu(DateOnly ngay ,string maPhim,string maRap)
         {
-            // Parse DateOnly an toàn
-            DateOnly parsedDate;
-            if (!DateOnly.TryParse(ngay, out parsedDate))
+            var now = DateTime.Now;
+            var scUpdate = db.SuatChieus
+                             .Where(s => s.NgayChieu <= ngay && s.TrangThai != "Đã chiếu")
+                             .ToList();
+            foreach (var sc in scUpdate)
             {
-                parsedDate = default;
+                if (sc.NgayChieu.ToDateTime(sc.GioChieu) < now)
+                    sc.TrangThai = "Đã chiếu";
             }
+            db.SaveChanges();
 
-            return ViewComponent("SuatChieu", new { maphim, maRap, ngay = parsedDate });
+            var suatChieu = db.SuatChieus
+                            .Include(s => s.MaPhongNavigation)
+                            .Where(s => s.MaPhim == maPhim && s.NgayChieu == ngay && s.MaPhongNavigation.MaRap == maRap && s.TrangThai == "Sắp chiếu")
+                            .OrderBy(s => s.GioChieu)
+                            .Distinct()
+                            .ToList();
+
+            return PartialView("_DanhSachSuatChieu", suatChieu);
         }
     }
 }

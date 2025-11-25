@@ -1,3 +1,4 @@
+using BookingMovieTicket.Helper;
 using BookingMovieTicket.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<QuanLyDatVePhimContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("MovieData")));
 
 builder.Services.AddSingleton<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(builder.Environment);
+
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
+builder.Services.AddScoped<xuLyMaKH>();
+
 
 var app = builder.Build();
 

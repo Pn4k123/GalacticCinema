@@ -108,10 +108,10 @@
 
                     <ul class="navbar-nav navbar-expand-sm ms-auto">
                         <li>
-                            <a class="nav-link text-black" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng Nhập</a>
+                            <a class="nav-link text-black" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng Nhập</a>
                         </li>
                         <li>
-                            <a class="nav-link text-black" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Đăng Ký</a>
+                            <a  class="nav-link text-black" id="openRegister">Đăng Ký</a>
                         </li>
                     </ul>
                 </div>
@@ -131,6 +131,24 @@
         </div>
 
     </footer>
+
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header border-bottom-0">
+                    <h1 class="modal-title fs-4 fw-bold text-center w-100">Đăng Ký Tài Khoản</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-3" id="registerContent">
+                    <!-- AJAX sẽ render form vào đây -->
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -180,65 +198,47 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header border-bottom-0">
-                    <h1 class="modal-title fs-4 fw-bold text-center w-100" id="registerModalLabel">Đăng Ký Tài Khoản</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 pt-0">
-                    <form action="/Account/Register" method="post">
 
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control rounded-3" id="registerName" >
-                            <label for="registerName">Họ và tên</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="email" class="form-control rounded-3" id="registerEmail" >
-                            <label for="registerEmail">Email</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="tel" class="form-control rounded-3" id="registerPhone">
-                            <label for="registerPhone">Số điện thoại</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <label  class="form-label"></label>
-                            <input type="radio"  />
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="password" class="form-control rounded-3" id="registerPassword">
-                            <label for="registerPassword">Mật khẩu</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="password" class="form-control rounded-3" id="confirmPassword" >
-                            <label for="confirmPassword">Nhập lại mật khẩu</label>
-                        </div>
-
-                        <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Đăng Ký</button>
-
-                        <div class="text-center mt-3">
-                            <span class="text-muted small">Đã có tài khoản?</span>
-                            <a href="#" class="text-decoration-none fw-bold small" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập ngay</a>
-                        </div>
-
-                        <hr class="my-4">
-                        <div class="text-center small text-muted">
-                            Bằng cách đăng ký, bạn đồng ý với <a href="#">Điều khoản sử dụng</a> & <a href="#">Chính sách bảo mật</a> của chúng tôi.
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+  
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+                $("#openRegister").on("click", function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "/KhachHang/DangKy",
+                type: "GET",
+                success: function (html) {
+                    $("#registerContent").html(html);
+                    $("#registerModal").modal("show");
+                }
+            });
+        });
+
+                       $(document).on("submit", "#formDangKy", function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "/KhachHang/DangKy",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function (response) {
+
+                    // success = true → đóng modal
+                    if (response.success) {
+                        $("#registerModal").modal("hide");
+                        alert("Đăng ký thành công!");
+                    }
+                    else {
+                        // response là HTML → render lại form kèm lỗi
+                        $("#registerContent").html(response);
+                    }
+                }
+            });
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
