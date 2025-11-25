@@ -47,10 +47,8 @@
 
         let ngay = element.getAttribute("data-date");
 
-        // Lấy mã phim từ Razor model
         let maPhim = "@Model.MaPhim";
 
-        // Load từng rạp
         document.querySelectorAll('.suatChieuContainer').forEach(function(container){
         let maRap = container.getAttribute('data-rap');
 

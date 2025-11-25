@@ -15,6 +15,6 @@ public partial class NguoiDung
     public DateTime? NgaySinh { get; set; }
     public string Sdt { get; set; } = null!;
     public string? VaiTro { get; set; }
-
+    public string? RandomKey { get; set; } = null!;
     public virtual ICollection<DonDatVe> DonDatVes { get; set; } = new List<DonDatVe>();
 }
