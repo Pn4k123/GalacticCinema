@@ -6,7 +6,12 @@
     ViewData["Title"] = "Đặt vé phim " + tenPhim;
     Layout = "~/Views/Shared/_Layout.cshtml";
     var phimNoibat = db.Phims.Select(p => new { p.MaPhim, p.TenPhim, p.Poster }).Where(p => p.MaPhim != Model.MaPhim);
-    var ngayChieu = db.SuatChieus.Select(nc => nc.NgayChieu).Distinct().Take(7);
+    DateTime today = DateTime.Today;
+    DateTime next6 = today.AddDays(6);
+
+    var ngayChieu = db.SuatChieus.Where(x => x.NgayChieu >= DateOnly.FromDateTime(today) && x.NgayChieu <= DateOnly.FromDateTime(next6))
+                                 .Select(x => x.NgayChieu)
+                                    .Distinct().OrderBy(x =>x).ToList();
     var rap = db.Raps.Select(r => new { r.MaRap, r.TenRap });
     var selectedDate = ngayChieu.FirstOrDefault();
 
@@ -31,40 +36,34 @@
         });
     });
     //------------------------------------------------------//
-$(document).ready(function () {
+    function chonNgay(element) {
 
-    $(".btn-ngay").on("click", function () {
+        const current = document.querySelector('.nav-link.active');
+        if (current) {
+            current.classList.remove('active');
+        }
 
-        $(".btn-ngay").removeClass("active");
-        $(this).addClass("active");
+        element.classList.add('active');
 
-        var selectedDate = $(this).data("date");
-        var maphim = "@Model.MaPhim";
+        let ngay = element.getAttribute("data-date");
 
-        $(".suatchieu-block").each(function () {
+        // Lấy mã phim từ Razor model
+        let maPhim = "@Model.MaPhim";
 
-            var rap = $(this).data("rap");
-            var block = $(this);
+        // Load từng rạp
+        document.querySelectorAll('.suatChieuContainer').forEach(function(container){
+        let maRap = container.getAttribute('data-rap');
 
-            $.ajax({
-                url: "/SuatChieu/LoadByDate",
-                type: "GET",
-                data: {
-                    maphim: maphim,
-                    maRap: rap,
-                    ngay: selectedDate
-                },
-                success: function (html) {
-                    block.html(html);
-                }
-            });
+        $.ajax({
+            url: '/SuatChieu/loadSuatChieu',
+            type: 'GET',
+            data: { ngay: ngay, maPhim: maPhim, maRap: maRap },
+            success: function(res){
+                container.innerHTML = res;
+            }
         });
     });
-
-    $(".btn-ngay:first").click();
-});
-
-
+    }
 
 </script>
 
@@ -156,37 +155,29 @@ $(document).ready(function () {
                 <ul class="nav nav-pills mb-4 gap-2" id="pills-tab" role="tablist">
                     @foreach (var item in ngayChieu)
                     {
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link text-center btn-ngay btn-ngay @(item == selectedDate ? "active" : "")"
-                                    data-date="@item.ToString("yyyy-MM-dd")"
-                                    style="min-width: 80px;">
-                                <div class="fw-bold">@item</div>
-                            </button>
-
-                        </li>
+                         <li class="nav-item" role="presentation">
+                        <button class="nav-link text-center border" style="min-width: 80px;"
+                                    onclick="chonNgay(this)" id="@item" data-date="@item.ToString("yyyy-MM-dd")">
+                            <div class="fw-bold">@item.ToString("dd/MM")</div>
+                            
+                        </button>
+                    </li>
                     }
-                    
                 </ul>
 
-                @foreach (var item in rap)
-                {
-                    <div class="card border-0 shadow-sm mb-3 rap-block">
-    <div class="card-body">
-        <h5 class="card-title fw-bold mb-3">@item.TenRap</h5>
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body">
 
-        <div class="d-flex flex-wrap gap-3 suatchieu-block" data-rap="@item.MaRap">
-            @await Component.InvokeAsync("SuatChieu",
-                new {
-                    maphim = Model.MaPhim,
-                    maRap = item.MaRap,
-                    ngay = selectedDate
-                })
-        </div>
-    </div>
-</div>
+                        @foreach (var item in rap)
+                        {
+                            <h5 class="card-title fw-bold mb-3">@item.TenRap</h5>
 
-                }
-            
+                            <div class="suatChieuContainer" data-rap="@item.MaRap">
+
+                            </div>
+                        }
+                    </div>
+                </div>
             </section>
         </div>
 
