@@ -1,4 +1,5 @@
 ﻿@using BookingMovieTicket.ViewModels
+@using Newtonsoft.Json
 @model BookingMovieTicket.Models.Phim
 
 @{
@@ -34,7 +35,19 @@
     <link rel="stylesheet" href="~/BookingMovieTicket.styles.css" asp-append-version="true" />
 
     <style>
+        .navbar-nav 
         
+        .nav-link:hover {
+            color: #ff9900 !important;
+        }
+        .nav-link a:hover {
+            color: #ff9900 !important;
+        }
+
+        #openLogin:hover,
+        #openRegister:hover {
+            color: #ff9900 !important;
+        }
     </style>
 </head>
 <body>
@@ -107,12 +120,30 @@
                     </ul>
 
                     <ul class="navbar-nav navbar-expand-sm ms-auto">
-                        <li>
-                            <a class="nav-link text-black" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng Nhập</a>
-                        </li>
-                        <li>
-                            <a  class="nav-link text-black" id="openRegister">Đăng Ký</a>
-                        </li>
+                        @{
+                            var session = Context.Session.GetString("NguoiDung");
+                            if(session == null)
+                            {
+                                <li>
+                                    <a class="nav-link text-black" id="openLogin">Đăng Nhập</a>
+                                </li>
+                                <li>
+                                    <a class="nav-link text-black" id="openRegister">Đăng Ký</a>
+                                </li>
+                            }
+                            else
+                            {
+                                NguoiDung kh = JsonConvert.DeserializeObject<NguoiDung>(session);
+                                <li>
+                                    <a asp-action="khachHangProfile" asp-controller="KhachHang" class="nav-link text-black">@kh.HoTen</a>
+                                </li>
+                                <li>
+                                    <a asp-action="DangXuat" asp-controller="KhachHang" class="nav-link text-black">Đăng Xuất</a>
+                                </li>
+                            }
+
+                        }
+                                            
                     </ul>
                 </div>
             </div>
@@ -142,7 +173,7 @@
                 </div>
 
                 <div class="modal-body p-3" id="registerContent">
-                    <!-- AJAX sẽ render form vào đây -->
+                   
                 </div>
 
             </div>
@@ -153,48 +184,16 @@
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 shadow">
+
                 <div class="modal-header border-bottom-0">
                     <h1 class="modal-title fs-4 fw-bold text-center w-100" id="loginModalLabel">Đăng Nhập</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4 pt-0">
-                    <form action="/Account/Login" method="post">
-                        <div class="form-floating mb-3">
-                            <input type="email" class="form-control rounded-3" id="floatingInput" >
-                            <label for="floatingInput">Email hoặc Số điện thoại</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input type="password" class="form-control rounded-3" id="floatingPassword" >
-                            <label for="floatingPassword">Mật khẩu</label>
-                        </div>
 
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="rememberMe">
-                                <label class="form-check-label text-secondary small" for="rememberMe">
-                                    Ghi nhớ đăng nhập
-                                </label>
-                            </div>
-                            <a href="#" class="text-decoration-none small">Quên mật khẩu?</a>
-                        </div>
-
-                        <button class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit">Đăng nhập</button>
-
-                        <div class="text-center mt-3">
-                            <span class="text-muted small">Chưa có tài khoản?</span>
-                            <a href="#" class="text-decoration-none fw-bold small">Đăng ký ngay</a>
-                        </div>
-
-                        <hr class="my-4">
-                        <h2 class="fs-5 fw-bold mb-3 text-center">Hoặc đăng nhập bằng</h2>
-                        <button class="w-100 py-2 mb-2 btn btn-outline-dark rounded-3" type="button">
-                            <i class="bi bi-google me-2"></i> Google
-                        </button>
-                        <button class="w-100 py-2 mb-2 btn btn-outline-primary rounded-3" type="button">
-                            <i class="bi bi-facebook me-2"></i> Facebook
-                        </button>
-                    </form>
+                <div class="modal-body p-4 pt-0" id="loginContent">
+                   
                 </div>
+
             </div>
         </div>
     </div>
@@ -217,6 +216,19 @@
             });
         });
 
+          $("#openLogin").on("click", function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "/KhachHang/DangNhap",
+                type: "GET",
+                success: function (html) {
+                    $("#loginContent").html(html);
+                    $("#loginModal").modal("show");
+                }
+            });
+        });
+
                        $(document).on("submit", "#formDangKy", function (e) {
             e.preventDefault();
 
@@ -235,6 +247,31 @@
                         // response là HTML → render lại form kèm lỗi
                         $("#registerContent").html(response);
                     }
+                }
+            });
+        });
+
+        $(document).on("submit", "#formDangNhap", function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "/KhachHang/DangNhap",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function (response) {
+
+                    // success = true → đóng modal
+                   if (response.success) {
+                $("#loginModal").modal("hide");
+
+                // chuyển hướng sau khi đăng nhập
+                window.location.href = response.redirectUrl;
+
+                return;
+            }
+
+            // Nếu không success thì response là HTML → cập nhật lại form
+            $("#loginContent").html(response);
                 }
             });
         });

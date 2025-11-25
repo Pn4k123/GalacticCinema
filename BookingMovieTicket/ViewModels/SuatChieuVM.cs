@@ -14,7 +14,6 @@ namespace BookingMovieTicket.ViewModels
 
         public TimeOnly GioChieu { get; set; }
 
-
         public virtual Phong MaPhongNavigation { get; set; } = null!;
 
         public virtual ICollection<Ve> Ves { get; set; } = new List<Ve>();

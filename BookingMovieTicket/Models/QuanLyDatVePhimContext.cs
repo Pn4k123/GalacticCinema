@@ -138,6 +138,9 @@ public partial class QuanLyDatVePhimContext : DbContext
             entity.Property(e => e.VaiTro)
                 .HasMaxLength(20)
                 .IsUnicode(false);
+            entity.Property(e => e.RandomKey)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Phim>(entity =>
