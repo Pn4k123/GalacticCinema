@@ -9,9 +9,11 @@ public partial class Ghe
 
     public string MaPhong { get; set; } = null!;
 
-    public string TenGhe { get; set; } = null!;
+    public string HangGhe { get; set; } = null!;
 
-    public string? LoaiGhe { get; set; }
+    public int SoGhe { get; set; }
+
+    public string LoaiGhe { get; set; } = null!;
 
     public virtual Phong MaPhongNavigation { get; set; } = null!;
 

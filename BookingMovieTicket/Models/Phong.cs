@@ -11,7 +11,7 @@ public partial class Phong
 
     public string TenPhong { get; set; } = null!;
 
-    public string? TrangThai { get; set; }
+    public string TrangThai { get; set; } = null!;
 
     public virtual ICollection<Ghe> Ghes { get; set; } = new List<Ghe>();
 
