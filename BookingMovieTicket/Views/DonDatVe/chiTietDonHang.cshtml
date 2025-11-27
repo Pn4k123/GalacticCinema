@@ -1,0 +1,187 @@
+﻿@model BookingMovieTicket.Models.SuatChieu
+
+@{
+    ViewData["Title"] = "Đặt Vé";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* --- CSS ĐƠN GIẢN --- */
+
+    /* 1. Màn hình đơn giản */
+    .screen {
+        background-color: #999;
+        height: 30px;
+        width: 80%;
+        margin: 0 auto 30px auto;
+        text-align: center;
+        line-height: 30px;
+        color: white;
+        font-weight: bold;
+        border-radius: 5px;
+        box-shadow: 0 5px 5px #ccc; /* Bóng nhẹ */
+    }
+
+    /* 2. Lưới ghế hình bàn cờ */
+    .seat-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr); /* 10 cột đều nhau */
+        gap: 10px; /* Khoảng cách ghế */
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* 3. Ô ghế cơ bản */
+    .seat {
+        height: 40px;
+        background-color: #e0e0e0; /* Ghế thường màu xám nhạt */
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+        /* -- Trạng thái ghế -- */
+
+        /* Ghế VIP (Màu vàng nhạt) */
+        .seat.vip {
+            background-color: #fff3cd;
+            border-color: #ffecb5;
+            color: #856404;
+        }
+
+        /* Đang chọn (Màu xanh lá) */
+        .seat.selected {
+            background-color: #28a745 !important;
+            color: white;
+        }
+
+        /* Đã bán (Màu đỏ) */
+        .seat.sold {
+            background-color: #dc3545;
+            color: white;
+            cursor: not-allowed; /* Cấm click */
+            opacity: 0.6;
+        }
+
+    /* Cột bên phải */
+    .info-box {
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="row">
+
+        <div class="col-md-8">
+            <h3 class="text-center mb-4">SƠ ĐỒ CHỖ NGỒI</h3>
+
+            <div class="screen">MÀN HÌNH</div>
+
+            <div class="text-center mb-4">
+                <span class="badge bg-light text-dark border me-2">Thường</span>
+                <span class="badge bg-warning text-dark me-2">VIP</span>
+                <span class="badge bg-danger me-2">Đã bán</span>
+                <span class="badge bg-success">Đang chọn</span>
+            </div>
+
+            <div class="seat-grid">
+                @{
+                    // Tạo dữ liệu giả lập ghế ngay tại View
+                    // Hàng A, B, C: Thường | D, E, F: VIP | G: Thường
+                    var rows = new[] { "A", "B", "C", "D", "E", "F", "G" };
+                }
+
+                @foreach (var row in rows)
+                {
+                    for (int i = 1; i <= 10; i++)
+                    {
+                        var seatName = row + i;
+                        var type = "normal"; // Mặc định thường
+                        var price = 50000;
+
+                        // Logic: Hàng D, E, F là VIP
+                        if (row == "D" || row == "E" || row == "F")
+                        {
+                            type = "vip";
+                            price = 70000;
+                        }
+
+                        // Logic: Giả sử vài ghế đã bán
+                        var isSold = (row == "C" && i == 5) || (row == "D" && i == 6) ? "sold" : "";
+
+                        <div class="seat @type @isSold"
+                             data-name="@seatName"
+                             data-price="@price">
+                            @seatName
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="info-box">
+                <h4 class="text-primary">@Model.MaPhimNavigation.TenPhim </h4>
+                <hr>
+                <p><strong>Rạp:</strong> @Model.MaPhongNavigation.MaRapNavigation.TenRap</p>
+                <p><strong>Suất:</strong>@Model.NgayChieu @Model.GioChieu</p>
+                <p><strong>Phòng:</strong> @Model.MaPhongNavigation.TenPhong</p>
+                <hr>
+                <p>Ghế chọn: <strong id="txtGhe" class="text-success">...</strong></p>
+                <p>Tổng tiền: <strong id="txtTien" class="text-danger fs-4">0 đ</strong></p>
+
+                <a href="@Url.Action("Index", "Phim", new { id = Model.MaPhim })" class="btn btn-primary w-100 mt-3">Quay lại</a>
+                <button class="btn btn-primary w-100 mt-3">Thanh Toán</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Lấy danh sách tất cả ghế chưa bán
+    var seats = document.querySelectorAll('.seat:not(.sold)');
+
+    // Biến lưu trữ
+    var listGhe = [];
+    var tongTien = 0;
+
+    // Duyệt qua từng ghế để gắn sự kiện click
+    seats.forEach(function(ghe) {
+        ghe.addEventListener('click', function() {
+
+            // Lấy giá và tên ghế từ thẻ HTML
+            var ten = this.getAttribute('data-name');
+            var gia = parseInt(this.getAttribute('data-price'));
+
+            // Kiểm tra xem ghế đã chọn chưa (có class 'selected' ko)
+            if (this.classList.contains('selected')) {
+                // Nếu đang chọn -> Bỏ chọn
+                this.classList.remove('selected');
+
+                // Xóa khỏi mảng
+                var index = listGhe.indexOf(ten);
+                if (index > -1) {
+                    listGhe.splice(index, 1);
+                }
+                tongTien -= gia;
+            } else {
+                // Nếu chưa chọn -> Chọn
+                this.classList.add('selected');
+                listGhe.push(ten);
+                tongTien += gia;
+            }
+
+            // Cập nhật giao diện
+            document.getElementById('txtGhe').innerText = listGhe.join(', ');
+            document.getElementById('txtTien').innerText = tongTien.toLocaleString('vi-VN') + ' đ';
+        });
+    });
+</script>

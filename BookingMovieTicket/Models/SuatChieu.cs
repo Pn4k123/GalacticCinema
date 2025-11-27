@@ -15,7 +15,7 @@ public partial class SuatChieu
 
     public TimeOnly GioChieu { get; set; }
 
-    public string? TrangThai { get; set; }
+    public string TrangThai { get; set; } = null!;
 
     public virtual Phim MaPhimNavigation { get; set; } = null!;
 

@@ -11,13 +11,11 @@ public partial class DonDatVe
 
     public DateTime ThoiGianDat { get; set; }
 
-    public decimal TongTien { get; set; }
-
-    public string? TrangThai { get; set; }
+    public string TrangThai { get; set; } = null!;
 
     public virtual ICollection<ChiTietDonDatVe> ChiTietDonDatVes { get; set; } = new List<ChiTietDonDatVe>();
 
     public virtual NguoiDung MaNdNavigation { get; set; } = null!;
 
-    public virtual ICollection<ThanhToan> ThanhToans { get; set; } = new List<ThanhToan>();
+    public virtual ThanhToan? ThanhToan { get; set; }
 }

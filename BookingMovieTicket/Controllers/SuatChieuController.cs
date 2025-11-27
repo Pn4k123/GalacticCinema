@@ -1,4 +1,5 @@
 ﻿using BookingMovieTicket.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,6 +10,7 @@ namespace BookingMovieTicket.Controllers
     public class SuatChieuController : Controller
     {
         QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
+
         public IActionResult loadSuatChieu(DateOnly ngay ,string maPhim,string maRap)
         {
             var now = DateTime.Now;
@@ -28,6 +30,9 @@ namespace BookingMovieTicket.Controllers
                             .OrderBy(s => s.GioChieu)
                             .Distinct()
                             .ToList();
+
+            var session = HttpContext.Session.GetString("NguoiDung");
+            ViewBag.DaDangNhap = (session != null);
 
             return PartialView("_DanhSachSuatChieu", suatChieu);
         }

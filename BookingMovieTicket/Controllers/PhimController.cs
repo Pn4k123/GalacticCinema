@@ -13,6 +13,7 @@ namespace BookingMovieTicket.Controllers
             Phim p = db.Phims.Include(p=>p.MaTheLoais).FirstOrDefault(p => p.MaPhim == id);
 
             ViewBag.DSTheLoai = p.MaTheLoais;
+
             return View(p);
         }
     }

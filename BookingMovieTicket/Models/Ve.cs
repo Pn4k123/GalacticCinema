@@ -11,7 +11,7 @@ public partial class Ve
 
     public string MaGhe { get; set; } = null!;
 
-    public string? TrangThai { get; set; }
+    public string TrangThai { get; set; } = null!;
 
     public DateTime? ThoiGianPhatHanh { get; set; }
 
