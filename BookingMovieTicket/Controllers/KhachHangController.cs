@@ -83,7 +83,7 @@ namespace BookingMovieTicket.Controllers
                         var claims = new List<Claim> {
                             new Claim(ClaimTypes.Email, khachHang.Email),
                             new Claim(ClaimTypes.Name, khachHang.HoTen),
-
+                            new Claim(ClaimTypes.NameIdentifier,khachHang.MaNd),
                             new Claim(ClaimTypes.Role, "KhachHang")
                         };
 

@@ -15,6 +15,8 @@ public partial class Ghe
 
     public string LoaiGhe { get; set; } = null!;
 
+    public decimal Gia { get; set; }
+
     public virtual Phong MaPhongNavigation { get; set; } = null!;
 
     public virtual ICollection<Ve> Ves { get; set; } = new List<Ve>();

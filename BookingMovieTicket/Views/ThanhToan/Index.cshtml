@@ -1,0 +1,149 @@
+﻿@model BookingMovieTicket.ViewModels.ThanhToanVM
+@{
+    ViewData["Title"] = "Thanh Toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .payment-container {
+        max-width: 900px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    .timer-box {
+        background: #ffeeba;
+        color: #856404;
+        padding: 10px;
+        text-align: center;
+        border-radius: 5px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .method-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+        .method-card:hover, .method-card.active {
+            border-color: #28a745;
+            background-color: #f0fff4;
+        }
+
+    .ticket-summary {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 5px solid #007bff;
+    }
+
+    .qr-placeholder {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+        display: block;
+    }
+</style>
+
+<div class="container">
+    <div class="payment-container">
+
+        <div class="timer-box">
+            Thời gian giữ ghế còn lại: <span id="countdown" style="font-size: 1.2rem;">10:00</span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7">
+                <h4 class="mb-4">Chọn phương thức thanh toán</h4>
+
+                <form asp-action="ProcessPayment" method="post" id="paymentForm">
+                    <input type="hidden" name="maDon" value="@Model.MaDon" />
+                    <input type="hidden" name="phuongThuc" id="selectedMethod" value="Momo" />
+
+                    <div class="method-card active" onclick="selectMethod(this, 'Momo')">
+                        <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" width="40" alt="Momo">
+                        <div>
+                            <strong>Ví điện tử Momo</strong><br>
+                            <small class="text-muted">Quét mã QR để thanh toán ngay</small>
+                        </div>
+                    </div>
+
+                    <div class="method-card" onclick="selectMethod(this, 'VNPay')">
+                        <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/9/06ncktiwd6dc1694418196384.png" width="40" alt="VNPay">
+                        <div>
+                            <strong>VNPay QR</strong><br>
+                            <small class="text-muted">Hỗ trợ tất cả ngân hàng</small>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4 p-3 border rounded bg-light" id="qrArea">
+                        <p>Quét mã để thanh toán:</p>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ThanhToanDonhang:@Model.MaDon" class="qr-placeholder" alt="QR Code" />
+                        <p class="mt-2 text-danger fw-bold">@Model.TongTien.ToString("N0") đ</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 btn-lg mt-4">XÁC NHẬN ĐÃ THANH TOÁN</button>
+                </form>
+            </div>
+
+            <div class="col-md-5">
+                <div class="ticket-summary">
+                    <h5 class="text-primary mb-3">Thông tin vé</h5>
+                    <h3 style="font-weight: 800">@Model.TenPhim</h3>
+                    <hr>
+                    <p><strong>Rạp:</strong> @Model.TenRap</p>
+                    <p><strong>Phòng:</strong> @Model.TenPhong</p>
+                    <p><strong>Suất chiếu:</strong> @Model.SuatChieu</p>
+                    <p><strong>Ghế:</strong> <span class="badge bg-success" style="font-size: 1rem">@Model.GheDaChon</span></p>
+                    <p><strong>Số lượng:</strong> @Model.SoLuongVe vé</p>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Tổng cộng:</span>
+                        <span class="text-danger fs-3 fw-bold">@Model.TongTien.ToString("N0") đ</span>
+                    </div>
+                </div>
+                <a href="/" class="btn btn-outline-secondary w-100 mt-3">Hủy giao dịch</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Logic chọn phương thức
+    function selectMethod(element, method) {
+        document.querySelectorAll('.method-card').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+        document.getElementById('selectedMethod').value = method;
+    }
+
+    // 2. Logic đếm ngược (10 phút)
+    let time = 10 * 60; // 10 phút tính bằng giây
+    const countdownEl = document.getElementById('countdown');
+
+    const timer = setInterval(() => {
+        const minutes = Math.floor(time / 60);
+        let seconds = time % 60;
+
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        countdownEl.innerHTML = `${minutes}:${seconds}`;
+
+        if (time > 0) {
+            time--;
+        } else {
+            clearInterval(timer);
+            alert("Hết thời gian giữ ghế! Vui lòng đặt lại.");
+            window.location.href = "/"; // Quay về trang chủ
+        }
+    }, 1000);
+</script>

@@ -17,6 +17,10 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 builder.Services.AddScoped<xuLyMaKH>();
 
+builder.Services.AddScoped<xuLyMaVe>();
+
+builder.Services.AddScoped<xuLyMaDon>();
+
 builder.Services.AddSession(option =>
 {
     option.IdleTimeout = TimeSpan.FromMinutes(10);
@@ -30,6 +34,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     options.AccessDeniedPath = "/AccessDenied";
 });
 
+builder.Services.AddHostedService<BookingMovieTicket.Services.VeAutoCleanerService>();
 
 var app = builder.Build();
 
