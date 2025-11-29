@@ -225,7 +225,7 @@
                 $(document).on("click", ".openDon", function (e) {
             e.preventDefault();
 
-            var isLogged = $(this).data("logged");  // true/false
+            var isLogged = $(this).data("logged");  //true/false
             var suatId = $(this).data("id");
 
             if (!isLogged) {
@@ -233,7 +233,6 @@
                 return;
             }
 
-            // Nếu đã đăng nhập → redirect đến ChiTietDonHang
             window.location.href = "/DonDatVe/chiTietDonHang?id=" + suatId;
         });
 
@@ -272,13 +271,13 @@
                 data: $(this).serialize(),
                 success: function (response) {
                      
-                    // success = true → đóng modal
+                    
                     if (response.success) {
                         $("#registerModal").modal("hide");
                         showToast("Đăng ký thành công!", "success");
                     }
                     else {
-                        // response là HTML → render lại form kèm lỗi
+
                         $("#registerContent").html(response);
                     }
                 }
@@ -296,7 +295,7 @@
                 data: $(this).serialize(),
                 success: function (response) {
 
-                    // success = true → đóng modal
+                    
                    if (response.success) {
                 $("#loginModal").modal("hide");
               
@@ -305,8 +304,6 @@
 
                 return;
             
-
-            // Nếu không success thì response là HTML → cập nhật lại form
             $("#loginContent").html(response);
                 }
             });

@@ -108,6 +108,7 @@ public partial class QuanLyDatVePhimContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength();
             entity.Property(e => e.LoaiGhe).HasMaxLength(20);
+            entity.Property(e => e.Gia).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.MaPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);

@@ -1,14 +1,11 @@
-﻿@model BookingMovieTicket.Models.SuatChieu
-
+﻿@model BookingMovieTicket.ViewModels.DatVeVM
 @{
-    ViewData["Title"] = "Đặt Vé";
+    ViewData["Title"] = "Đặt Vé: " + Model.TenPhim;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
-    /* --- CSS ĐƠN GIẢN --- */
-
-    /* 1. Màn hình đơn giản */
+    /* --- CSS CỦA BẠN (GIỮ NGUYÊN) --- */
     .screen {
         background-color: #999;
         height: 30px;
@@ -19,22 +16,28 @@
         color: white;
         font-weight: bold;
         border-radius: 5px;
-        box-shadow: 0 5px 5px #ccc; /* Bóng nhẹ */
+        box-shadow: 0 5px 5px #ccc;
     }
 
-    /* 2. Lưới ghế hình bàn cờ */
     .seat-grid {
         display: grid;
-        grid-template-columns: repeat(10, 1fr); /* 10 cột đều nhau */
-        gap: 10px; /* Khoảng cách ghế */
+        /* Grid tự động xuống dòng, mỗi ghế rộng khoảng 40px */
+        grid-template-columns: repeat(10, 1fr);
+        gap: 10px;
         max-width: 600px;
         margin: 0 auto;
     }
 
-    /* 3. Ô ghế cơ bản */
-    .seat {
+    /* --- SỬA ĐỔI QUAN TRỌNG: CHECKBOX HACK --- */
+    /* Ẩn input checkbox đi */
+    .seat-checkbox {
+        display: none;
+    }
+
+    /* Label đóng vai trò là ô ghế hiển thị (.seat) */
+    .seat-label {
         height: 40px;
-        background-color: #e0e0e0; /* Ghế thường màu xám nhạt */
+        background-color: #e0e0e0;
         border: 1px solid #ccc;
         border-radius: 5px;
         cursor: pointer;
@@ -43,145 +46,159 @@
         justify-content: center;
         font-size: 12px;
         font-weight: bold;
+        user-select: none; /* Chặn bôi đen text */
+        transition: 0.2s;
     }
 
-        /* -- Trạng thái ghế -- */
+        /* --- TRẠNG THÁI MÀU SẮC --- */
 
-        /* Ghế VIP (Màu vàng nhạt) */
-        .seat.vip {
+        /* 1. Ghế VIP */
+        .seat-label.vip {
             background-color: #fff3cd;
             border-color: #ffecb5;
             color: #856404;
         }
 
-        /* Đang chọn (Màu xanh lá) */
-        .seat.selected {
-            background-color: #28a745 !important;
-            color: white;
-        }
-
-        /* Đã bán (Màu đỏ) */
-        .seat.sold {
+        /* 2. Ghế Đã Bán (Disabled) */
+        .seat-label.sold {
             background-color: #dc3545;
             color: white;
-            cursor: not-allowed; /* Cấm click */
+            cursor: not-allowed;
             opacity: 0.6;
         }
 
-    /* Cột bên phải */
+    /* 3. Ghế Đang Chọn (Khi Checkbox được checked) */
+    /* Đây là kỹ thuật CSS: Khi input check thì label đứng ngay sau nó sẽ đổi màu */
+    .seat-checkbox:checked + .seat-label {
+        background-color: #28a745 !important;
+        color: white;
+        border-color: #28a745;
+        transform: scale(1.1); /* Hiệu ứng phóng to nhẹ */
+    }
+
     .info-box {
         border: 1px solid #ddd;
         padding: 15px;
         border-radius: 5px;
         background-color: #f9f9f9;
+        position: sticky;
+        top: 20px; /* Giúp khung thanh toán chạy theo khi cuộn */
     }
 </style>
 
 <div class="container py-4">
-    <div class="row">
+    <form asp-controller="DonDatVe" asp-action="XacNhanDatVe" method="post">
 
-        <div class="col-md-8">
-            <h3 class="text-center mb-4">SƠ ĐỒ CHỖ NGỒI</h3>
+        <input type="hidden" name="maSuatChieu" value="@Model.MaSuatChieu" />
 
-            <div class="screen">MÀN HÌNH</div>
+        <div class="row">
+            <div class="col-md-8">
+                <h3 class="text-center mb-4">SƠ ĐỒ CHỖ NGỒI</h3>
+                <div class="screen">MÀN HÌNH</div>
 
-            <div class="text-center mb-4">
-                <span class="badge bg-light text-dark border me-2">Thường</span>
-                <span class="badge bg-warning text-dark me-2">VIP</span>
-                <span class="badge bg-danger me-2">Đã bán</span>
-                <span class="badge bg-success">Đang chọn</span>
-            </div>
+                <div class="text-center mb-4">
+                    <span class="badge bg-light text-dark border me-2">Thường</span>
+                    <span class="badge bg-warning text-dark me-2">VIP</span>
+                    <span class="badge bg-danger me-2">Đã bán</span>
+                    <span class="badge bg-success">Đang chọn</span>
+                </div>
 
-            <div class="seat-grid">
-                @{
-                    // Tạo dữ liệu giả lập ghế ngay tại View
-                    // Hàng A, B, C: Thường | D, E, F: VIP | G: Thường
-                    var rows = new[] { "A", "B", "C", "D", "E", "F", "G" };
-                }
-
-                @foreach (var row in rows)
-                {
-                    for (int i = 1; i <= 10; i++)
+                <div class="seat-grid">
+                    @foreach (var ghe in Model.DanhSachGhe)
                     {
-                        var seatName = row + i;
-                        var type = "normal"; // Mặc định thường
-                        var price = 50000;
+                        // Xác định class VIP hay Thường
+                        var vipClass = (ghe.LoaiGhe != null && ghe.LoaiGhe.ToUpper().Contains("VIP")) ? "vip" : "";
 
-                        // Logic: Hàng D, E, F là VIP
-                        if (row == "D" || row == "E" || row == "F")
-                        {
-                            type = "vip";
-                            price = 70000;
-                        }
+                        // Xác định class Đã bán
+                        var soldClass = ghe.DaDat ? "sold" : "";
 
-                        // Logic: Giả sử vài ghế đã bán
-                        var isSold = (row == "C" && i == 5) || (row == "D" && i == 6) ? "sold" : "";
+                        <div class="seat-item">
+                            @if (ghe.DaDat)
+                            {
+                                // Nếu đã đặt: Chỉ hiện Label, không có Checkbox (để không click được)
+                                <div class="seat-label @soldClass">
+                                    @ghe.HangGhe@ghe.SoGhe
+                                </div>
+                            }
+                            else
+                            {
+                                // Nếu chưa đặt: Hiện Checkbox + Label
+                                <input type="checkbox"
+                                       class="seat-checkbox"
+                                       id="seat-@ghe.MaGhe"
+                                       name="danhSachMaGheChon"
+                                       value="@ghe.MaGhe"
+                                       data-price="@ghe.Gia"
+                                       data-name="@ghe.HangGhe@ghe.SoGhe" />
 
-                        <div class="seat @type @isSold"
-                             data-name="@seatName"
-                             data-price="@price">
-                            @seatName
+                                <label for="seat-@ghe.MaGhe" class="seat-label @vipClass">
+                                    @ghe.HangGhe@ghe.SoGhe
+                                </label>
+                            }
                         </div>
                     }
-                }
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="info-box">                   
+                    <h5 class="text-black">@Model.TenPhim</h5>
+                    <img src="@Model.Poster" alt="Poster Phim" class="w-100" style="max-width:60%;"/>
+                    <hr>
+                    <p><strong>Rạp:</strong> @Model.TenPhong</p>
+                    <p><strong>Suất:</strong> @Model.NgayChieu @Model.GioChieu</p>
+                    <hr>
+                    <p>Ghế chọn: <strong id="txtGhe" class="text-success"></strong></p>
+                    <p>Tổng tiền: <strong id="txtTien" class="text-danger fs-4"></strong></p>
+
+                    <button type="submit" class="btn btn-success w-100 mt-3" id="btnThanhToan" disabled>
+                        Thanh Toán Ngay
+                    </button>
+
+                    <a href="@Url.Action("Index", "Phim",new {id = Model.MaPhim}) " class="btn btn-outline-secondary w-100 mt-2">Quay lại</a>
+                </div>
             </div>
         </div>
-
-        <div class="col-md-4">
-            <div class="info-box">
-                <h4 class="text-primary">@Model.MaPhimNavigation.TenPhim </h4>
-                <hr>
-                <p><strong>Rạp:</strong> @Model.MaPhongNavigation.MaRapNavigation.TenRap</p>
-                <p><strong>Suất:</strong>@Model.NgayChieu @Model.GioChieu</p>
-                <p><strong>Phòng:</strong> @Model.MaPhongNavigation.TenPhong</p>
-                <hr>
-                <p>Ghế chọn: <strong id="txtGhe" class="text-success">...</strong></p>
-                <p>Tổng tiền: <strong id="txtTien" class="text-danger fs-4">0 đ</strong></p>
-
-                <a href="@Url.Action("Index", "Phim", new { id = Model.MaPhim })" class="btn btn-primary w-100 mt-3">Quay lại</a>
-                <button class="btn btn-primary w-100 mt-3">Thanh Toán</button>
-            </div>
-        </div>
-    </div>
+    </form>
 </div>
 
 <script>
-    // Lấy danh sách tất cả ghế chưa bán
-    var seats = document.querySelectorAll('.seat:not(.sold)');
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('.seat-checkbox');
+        const txtGhe = document.getElementById('txtGhe');
+        const txtTien = document.getElementById('txtTien');
+        const btnThanhToan = document.getElementById('btnThanhToan');
 
-    // Biến lưu trữ
-    var listGhe = [];
-    var tongTien = 0;
+        // Hàm cập nhật mỗi khi click
+        function updateSummary() {
+            let total = 0;
+            let selectedSeats = [];
 
-    // Duyệt qua từng ghế để gắn sự kiện click
-    seats.forEach(function(ghe) {
-        ghe.addEventListener('click', function() {
-
-            // Lấy giá và tên ghế từ thẻ HTML
-            var ten = this.getAttribute('data-name');
-            var gia = parseInt(this.getAttribute('data-price'));
-
-            // Kiểm tra xem ghế đã chọn chưa (có class 'selected' ko)
-            if (this.classList.contains('selected')) {
-                // Nếu đang chọn -> Bỏ chọn
-                this.classList.remove('selected');
-
-                // Xóa khỏi mảng
-                var index = listGhe.indexOf(ten);
-                if (index > -1) {
-                    listGhe.splice(index, 1);
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    // Cộng tiền
+                    total += parseFloat(cb.getAttribute('data-price'));
+                    // Lấy tên ghế
+                    selectedSeats.push(cb.getAttribute('data-name'));
                 }
-                tongTien -= gia;
-            } else {
-                // Nếu chưa chọn -> Chọn
-                this.classList.add('selected');
-                listGhe.push(ten);
-                tongTien += gia;
-            }
+            });
 
             // Cập nhật giao diện
-            document.getElementById('txtGhe').innerText = listGhe.join(', ');
-            document.getElementById('txtTien').innerText = tongTien.toLocaleString('vi-VN') + ' đ';
+            if (selectedSeats.length > 0) {
+                txtGhe.innerText = selectedSeats.join(', ');
+                btnThanhToan.removeAttribute('disabled'); // Bật nút thanh toán
+            } else {
+                txtGhe.innerText = '...';
+                btnThanhToan.setAttribute('disabled', 'disabled'); // Tắt nút nếu chưa chọn
+            }
+
+            // Format tiền Việt Nam
+            txtTien.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' đ';
+        }
+
+        // Gắn sự kiện change cho tất cả checkbox
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateSummary);
         });
     });
 </script>
