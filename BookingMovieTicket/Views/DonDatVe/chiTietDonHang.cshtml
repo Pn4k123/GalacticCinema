@@ -146,7 +146,7 @@
                     <img src="@Model.Poster" alt="Poster Phim" class="w-100" style="max-width:60%;"/>
                     <hr>
                     <p><strong>Rạp:</strong> @Model.TenPhong</p>
-                    <p><strong>Suất:</strong> @Model.NgayChieu @Model.GioChieu</p>
+                    <p><strong>Suất:</strong> @Model.NgayChieu.ToString("dd/MM/yyyy") @Model.GioChieu</p>
                     <hr>
                     <p>Ghế chọn: <strong id="txtGhe" class="text-success"></strong></p>
                     <p>Tổng tiền: <strong id="txtTien" class="text-danger fs-4"></strong></p>

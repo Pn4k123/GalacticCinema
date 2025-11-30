@@ -1,3 +1,208 @@
-﻿<h1>Profile</h1>
+﻿@model BookingMovieTicket.Models.NguoiDung
 
-<h2>Welcome @Context.User.Identity.Name</h2>
+
+@{
+    ViewData["Title"] = "Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* --- CSS RIÊNG CHO TRANG PROFILE --- */
+
+    /* 1. Sidebar bên trái */
+    .profile-sidebar {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background-color: #fff;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+    }
+
+    .avatar-img {
+        width: 100px;
+        height: 100px;
+        background-color: #ddd;
+        border-radius: 50%;
+        margin-bottom: 10px;
+        object-fit: cover;
+    }
+
+    .profile-menu .list-group-item {
+        border: none;
+        background-color: transparent;
+        padding: 12px 20px;
+        font-weight: 500;
+        color: #555;
+        transition: all 0.2s;
+    }
+
+        .profile-menu .list-group-item:hover {
+            background-color: #e9ecef;
+            color: #000;
+        }
+
+        .profile-menu .list-group-item.active {
+            background-color: #fff;
+            color: #f39c12; /* Màu cam giống hình */
+            font-weight: bold;
+            border-left: 4px solid #f39c12;
+        }
+
+    /* 2. Form bên phải */
+    .profile-content {
+        background-color: #fff;
+        padding: 0 20px;
+    }
+
+    .section-title {
+        font-weight: bold;
+        text-transform: uppercase;
+        border-bottom: 2px solid #f39c12; /* Gạch chân màu cam */
+        display: inline-block;
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+    }
+
+    .form-label-custom {
+        font-weight: 500;
+        color: #555;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    .btn-save {
+        background-color: #f39c12;
+        color: white;
+        font-weight: bold;
+        padding: 10px 40px;
+        border: none;
+        border-radius: 5px;
+        text-transform: uppercase;
+    }
+
+        .btn-save:hover {
+            background-color: #e67e22;
+            color: white;
+        }
+
+    .toggle-password {
+        cursor: pointer;
+        color: #f39c12;
+        font-size: 0.9rem;
+        float: right;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="profile-sidebar shadow-sm border">
+                <div class="profile-header">
+                    <img src="~/hinhanh/avatar/avatar.jpg" alt="Avatar" class="avatar-img shadow-sm">
+                    <h5 class="fw-bold mb-1">@Model.HoTen</h5>
+                    <div class="text-warning small mb-2">
+                        <i class="bi bi-star-fill"></i> 0 Stars
+                    </div>
+                </div>
+
+                <div class="list-group profile-menu list-group-flush py-2">
+                    <a asp-action="khachHangProfile" asp-controller="KhachHang" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-person-circle me-2"></i> Thông tin tài khoản
+                    </a>
+                    <a asp-action="lichSuGiaoDich" asp-controller="KhachHang" class="list-group-item list-group-item-action">
+                        <i class="bi bi-clock-history me-2"></i> Lịch sử giao dịch
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-envelope-paper me-2"></i> Góp ý cho rạp
+                    </a>
+                    <a asp-action="DangXuat" asp-controller="KhachHang" class="list-group-item list-group-item-action text-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="profile-content">
+                <h4 class="mb-4 border-bottom pb-2">
+                    <span class="section-title mb-0 border-0 text-decoration-underline" style="text-decoration-color: #f39c12 !important; text-underline-offset: 8px;">THÔNG TIN TÀI KHOẢN</span>
+                </h4>
+
+                <form>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="@Model.HoTen" class="form-label form-label-custom"></label>
+                            <input asp-for="@Model.HoTen" type="text" class="form-control" disabled>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="@Model.Email" class="form-label form-label-custom"></label>
+                            <input asp-for="@Model.Email" type="email" class="form-control" disabled>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="@Model.Sdt" class="form-label form-label-custom"></label>
+                            <input asp-for="@Model.Sdt" type="tel" class="form-control" disabled>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="@Model.NgaySinh" class="form-label form-label-custom"></label>
+                            <input asp-for="@Model.NgaySinh" type="date" class="form-control" disabled>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="@Model.GioiTinh" class="form-label form-label-custom d-block"></label>
+                            <div class="mt-2">
+                                @{
+                                    if (Model.GioiTinh == 1)
+                                    {
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="gender" id="male" value="1" checked disabled>
+                                            <label class="form-check-label" for="male">Nam</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="gender" id="female" value="0" disabled>
+                                            <label class="form-check-label" for="female">Nữ</label>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="gender" id="male" value="1" disabled>
+                                            <label class="form-check-label" for="male">Nam</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="gender" id="female" value="0" checked disabled>
+                                            <label class="form-check-label" for="female">Nữ</label>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="@Model.MatKhau" class="form-label form-label-custom w-100">
+                
+                            </label>
+                            <input asp-for="@Model.MatKhau" type="password" value="********" class="form-control" disabled>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-save">THAY ĐỔI</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

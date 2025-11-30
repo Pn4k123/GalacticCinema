@@ -2,10 +2,12 @@
 using BookingMovieTicket.Helper;
 using BookingMovieTicket.Models;
 using BookingMovieTicket.ViewModels;
+using Humanizer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Newtonsoft.Json;
 using System.Security.Claims;
@@ -31,6 +33,7 @@ namespace BookingMovieTicket.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult DangKy(DangKyVM model)
         {
             if (ModelState.IsValid)
@@ -64,6 +67,7 @@ namespace BookingMovieTicket.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangNhap(DangNhapVM model,string? ReturnUrl)
         {
             ViewBag.ReturnUrl = ReturnUrl;
@@ -108,7 +112,53 @@ namespace BookingMovieTicket.Controllers
         [Authorize]
         public IActionResult khachHangProfile()
         {
-            return View();
+            NguoiDung nd = db.NguoiDungs.Find(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return View(nd);
+        }
+
+        [Authorize]
+        public IActionResult lichSuGiaoDich()
+        {
+            NguoiDung nd = db.NguoiDungs.Find(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            ViewBag.NguoiDung = nd;
+
+            var dsDonHang = db.DonDatVes
+               .Include(d => d.ChiTietDonDatVes)
+                   .ThenInclude(ct => ct.MaVeNavigation)
+                       .ThenInclude(v => v.MaGheNavigation)
+               .Include(d => d.ChiTietDonDatVes)
+                   .ThenInclude(ct => ct.MaVeNavigation)
+                       .ThenInclude(v => v.MaSuatChieuNavigation)
+                           .ThenInclude(s => s.MaPhimNavigation)
+                .Include(d => d.ChiTietDonDatVes)
+                   .ThenInclude(ct => ct.MaVeNavigation)
+                       .ThenInclude(v => v.MaSuatChieuNavigation)
+                           .ThenInclude(s => s.MaPhongNavigation)
+                               .ThenInclude(r => r.MaRapNavigation)
+               .Where(d => d.MaNd == User.FindFirstValue(ClaimTypes.NameIdentifier))
+               .OrderByDescending(d => d.ThoiGianDat)
+               .ToList();
+
+            var model =  dsDonHang
+                        .Where(d => d.ChiTietDonDatVes != null && d.ChiTietDonDatVes.Any())
+                        .Select(don => new LichSuDatVeVM
+                        {
+                            MaDon = don.MaDon,
+                            NgayDat = don.ThoiGianDat,
+                            TrangThai = don.TrangThai,
+                            NgayChieu = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.NgayChieu,
+                            GioChieu = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.GioChieu,
+                            TongTien = don.ChiTietDonDatVes.Sum(ct => ct.GiaVe),
+
+                            TenPhim = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.TenPhim ?? "Không xác định",
+                            Poster = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.Poster,
+                            TenRapvaPhong = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.MaPhongNavigation.MaRapNavigation.TenRap + " - " +
+                             don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.MaPhongNavigation.TenPhong,
+
+                            Ghe = string.Join(", ", don.ChiTietDonDatVes.Select(ct => ct.MaVeNavigation.MaGheNavigation.HangGhe + ct.MaVeNavigation.MaGheNavigation.SoGhe))
+                        }).ToList();
+
+            return View(model);
         }
 
         [Authorize]

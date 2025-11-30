@@ -108,7 +108,7 @@
                         <p><strong>Đạo diễn:</strong> @Model.DaoDien</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Khởi chiếu:</strong> @(Model.NgayPhatHanh.HasValue? Model.NgayPhatHanh.Value.ToShortDateString() : "")</p>
+                        <p><strong>Khởi chiếu:</strong> @(Model.NgayPhatHanh.HasValue? Model.NgayPhatHanh.Value.ToString("dd/MM/yyyy") : "")</p>
                     </div>
                 </div>
 
