@@ -211,7 +211,12 @@
   
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     <script>
                 function showToast(message, type = "danger") {
             $("#toastMessage").text(message);
@@ -284,9 +289,9 @@
             });
         });
 
-                 
 
-        $(document).on("submit", "#formDangNhap", function (e) {
+
+                $(document).on("submit", "#formDangNhap", function (e) {
             e.preventDefault();
 
             $.ajax({
@@ -294,17 +299,17 @@
                 type: "POST",
                 data: $(this).serialize(),
                 success: function (response) {
-
-                    
-                   if (response.success) {
-                $("#loginModal").modal("hide");
-              
-                     window.location.href = response.redirectUrl;
-                }
-
-                return;
-            
-            $("#loginContent").html(response);
+                    // Trường hợp thành công
+                    if (response.success) {
+                        $("#loginModal").modal("hide");
+                        window.location.href = response.redirectUrl;
+                    }
+                    else {
+                        $("#loginContent").html(response);
+                    }
+                },
+                error: function (){
+                     showToast("Lỗi hệ thống", "danger");
                 }
             });
         });
