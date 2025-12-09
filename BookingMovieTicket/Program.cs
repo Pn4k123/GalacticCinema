@@ -1,5 +1,6 @@
 using BookingMovieTicket.Helper;
 using BookingMovieTicket.Models;
+using BookingMovieTicket.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,6 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 builder.Services.AddScoped<xuLyMaKH>();
 
-builder.Services.AddScoped<xuLyMaVe>();
-
 builder.Services.AddScoped<xuLyMaDon>();
 
 builder.Services.AddSession(option =>
@@ -35,6 +34,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 });
 
 builder.Services.AddHostedService<BookingMovieTicket.Services.VeAutoCleanerService>();
+
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
 
 var app = builder.Build();
 
@@ -58,7 +59,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
       name: "areas",
-      pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}"
+      pattern: "{area:exists}/{controller=Admin}/{action=Login}/{id?}"
     );
 
 

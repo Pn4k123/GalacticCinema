@@ -6,15 +6,19 @@
 @{
     QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
     int tongPhim = db.Phims.Count();
+    decimal tongDoanhThu = db.ChiTietDonDatVes.Sum(ct => ct.GiaVe);
+    int tongKH = db.NguoiDungs.Where(k => k.MaNd.StartsWith("KH")).Count();
+    int tongVeBan = db.DonDatVes.Where(d => d.TrangThai == "Đã thanh toán").Count();
 }
 
-<div class="page-inner">
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-        <div>
-            <h3 class="fw-bold mb-3">Dashboard</h3>
-            <h6 class="op-7 mb-2">Tổng quan nhanh về hệ thống của bạn</h6>
-        </div>
+<header class="bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h3 class="fw-bold mb-3">Dashboard</h3>
+        <h6 class="op-7 mb-2">Tổng quan nhanh về hệ thống của bạn</h6>
     </div>
+</header>
+
+<div class="page-inner">
 
     <div class="row">
         <div class="col-sm-6 col-md-3">
@@ -29,7 +33,7 @@
                         <div class="col-7 col-stats">
                             <div class="numbers">
                                 <p class="card-category">Doanh thu (VND)</p>
-                                <h4 class="card-title">1,280,000</h4>
+                                <h4 class="card-title">@tongDoanhThu</h4>
                             </div>
                         </div>
                     </div>
@@ -48,7 +52,7 @@
                         <div class="col-7 col-stats">
                             <div class="numbers">
                                 <p class="card-category">Người dùng</p>
-                                <h4 class="card-title">150</h4>
+                                <h4 class="card-title">@tongKH</h4>
                             </div>
                         </div>
                     </div>
@@ -67,7 +71,7 @@
                         <div class="col-7 col-stats">
                             <div class="numbers">
                                 <p class="card-category">Vé đã bán</p>
-                                <h4 class="card-title">1,303</h4>
+                                <h4 class="card-title">@tongVeBan</h4>
                             </div>
                         </div>
                     </div>

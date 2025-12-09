@@ -156,8 +156,6 @@
                                         @{
                                                 var statusClass = "bg-secondary";
                                                 if (item.TrangThai == "Đã thanh toán") statusClass = "bg-success";
-                                                else if (item.TrangThai == "Đang chờ") statusClass = "bg-warning text-dark";
-                                                else if (item.TrangThai.Contains("Hủy")) statusClass = "bg-danger";
                                             
                                         }
                                             <span class="badge @statusClass">@item.TrangThai</span>

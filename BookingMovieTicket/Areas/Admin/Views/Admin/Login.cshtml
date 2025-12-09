@@ -1,0 +1,91 @@
+﻿@model BookingMovieTicket.ViewModels.DangNhapVM
+@{
+    Layout = null; 
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng Nhập Admin</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+        body {
+            background-color: #f0f2f5; /* Màu nền xám nhẹ dễ chịu */
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* Đổ bóng nhẹ */
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+            .login-header h3 {
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+        .form-control {
+            height: 45px;
+            border-radius: 5px;
+        }
+
+        .btn-login {
+            height: 45px;
+            font-weight: bold;
+            font-size: 16px;
+            background-color: #0d6efd;
+            border: none;
+        }
+
+            .btn-login:hover {
+                background-color: #0b5ed7;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <div class="login-header">
+            <h3>ADMIN PANEL</h3>
+            <p class="text-muted">Đăng nhập để quản lý hệ thống</p>
+        </div>
+
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label fw-bold"></label>
+                <input asp-for="Email" type="email" class="form-control">
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="MatKhau" class="form-label fw-bold"></label>
+                <input asp-for="MatKhau" type="password" class="form-control">
+                <span asp-validation-for="MatKhau" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-login">ĐĂNG NHẬP</button>
+
+        </form>
+    </div>
+
+</body>
+</html>

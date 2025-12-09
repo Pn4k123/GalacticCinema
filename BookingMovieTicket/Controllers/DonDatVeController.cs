@@ -22,7 +22,7 @@ namespace BookingMovieTicket.Controllers
         }
         public IActionResult chiTietDonHang(string id)
         {
-            SuatChieu sc = db.SuatChieus
+            SuatChieu? sc = db.SuatChieus
                                 .Include(x => x.MaPhimNavigation)
                                 .Include(x => x.MaPhongNavigation)
                                 .Include(x => x.MaPhongNavigation.MaRapNavigation)
@@ -96,7 +96,15 @@ namespace BookingMovieTicket.Controllers
                     db.DonDatVes.Add(donHang);
                     db.SaveChanges();
 
-                    int soLuongVeHienTai = db.Ves.Count(v => v.MaVe.StartsWith("V"));
+                    var danhSachMa = db.Ves
+                                    .Where(v => v.MaVe.StartsWith("V"))
+                                    .Select(v => v.MaVe)
+                                    .ToList();
+
+                    int soLuongVeHienTai = danhSachMa
+                                            .Select(ma => int.Parse(ma.Substring(1))) 
+                                            .DefaultIfEmpty(0) 
+                                            .Max();
 
                     foreach (var maGhe in danhSachMaGheChon)
                     {
