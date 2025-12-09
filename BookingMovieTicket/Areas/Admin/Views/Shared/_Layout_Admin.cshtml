@@ -94,8 +94,9 @@
                     </li>
 
                     <li class="mb-2">
-                        <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
-                            <span class="material-icons me-3 text-secondary">people</span>
+                        <a asp-area="Admin" asp-controller="QuanLyTaiKhoan" asp-action="Index"
+                            class="d-flex align-items-center p-3 rounded text-dark text-decoration-none @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyTaiKhoan" ? "active" : "")">
+                            <span class="material-icons me-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyTaiKhoan" ? "text-primary" : "text-secondary")">people</span>
                             Quản lý tài khoản
                         </a>
                     </li>

@@ -1,4 +1,6 @@
-﻿using BookingMovieTicket.Models;
+﻿using BookingMovieTicket.Helper;
+using BookingMovieTicket.Models;
+using BookingMovieTicket.Services;
 using BookingMovieTicket.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,9 +10,11 @@ namespace BookingMovieTicket.Controllers
     public class ThanhToanController : Controller
     {
         private readonly QuanLyDatVePhimContext db;
+        private readonly IVnPayService _vnPayService;
 
-        public ThanhToanController(QuanLyDatVePhimContext context) {
+        public ThanhToanController(QuanLyDatVePhimContext context, IVnPayService vnPayService) {
             db = context;
+            _vnPayService = vnPayService;
         }
         public IActionResult Index(string maDon)
         {
@@ -92,24 +96,76 @@ namespace BookingMovieTicket.Controllers
                 return View("PaymentError");
             }
 
-            // --- NẾU VƯỢT QUA TẤT CẢ CÁC CHECK TRÊN THÌ MỚI THU TIỀN ---
-
-            // 4. Cập nhật trạng thái thành công
-            donHang.TrangThai = "Đã thanh toán";
-
-            // 5. Lưu lịch sử thanh toán
-            var thanhToan = new ThanhToan
+            if (phuongThuc == "VNPay")
             {
-                MaDon = maDon,
-                PhuongThuc = phuongThuc,
-                ThoiGian = DateTime.Now,
-                TrangThai = "Thành công"
-            };
-            db.ThanhToans.Add(thanhToan);
+                var vnPayModel = new VnPaymentRequestModel
+                {
+                    donHang = donHang
+                };
+                string paymentUrl = _vnPayService.CreatePaymentUrl(HttpContext, vnPayModel);
+                return Redirect(paymentUrl);
+            }
+            else {
+                donHang.TrangThai = "Đã thanh toán";
 
-            db.SaveChanges();
+                // 5. Lưu lịch sử thanh toán
+                var thanhToan = new ThanhToan
+                {
+                    MaDon = maDon,
+                    PhuongThuc = phuongThuc,
+                    ThoiGian = DateTime.Now,
+                    TrangThai = "Thành công"
+                };
+                db.ThanhToans.Add(thanhToan);
 
-            return RedirectToAction("Index","Home");
+                db.SaveChanges();
+
+                return RedirectToAction("PaymentSuccess");
+            }
+        }
+
+        public IActionResult PaymentCallback()
+        {
+            var response = _vnPayService.PaymentExecute(Request.Query);
+
+            if (response == null || !response.Success)
+            {
+                ViewBag.Message = $"Lỗi thanh toán VNPay: {response?.VnPayResponseCode}";
+                return View("PaymentError");
+            }
+
+            // Xử lý khi thành công (00)
+            if (response.VnPayResponseCode == "00")
+            {
+                var maDon = response.OrderId; // Đây là MaDon (GUID string)
+                var donHang = db.DonDatVes.FirstOrDefault(d => d.MaDon == maDon);
+
+                if (donHang != null)
+                {
+                    donHang.TrangThai = "Đã thanh toán";
+
+                    var thanhToan = new ThanhToan
+                    {
+                        MaDon = maDon,
+                        PhuongThuc = "VNPay",
+                        ThoiGian = DateTime.Now,
+                        TrangThai = "Thành công"
+                    };
+                    db.ThanhToans.Add(thanhToan);
+                    db.SaveChanges();
+
+                    return RedirectToAction("PaymentSuccess");
+                }
+            }
+
+            ViewBag.Message = $"Giao dịch thất bại. Mã lỗi: {response.VnPayResponseCode}";
+            return View("PaymentError");
+        }
+        
+
+        public IActionResult PaymentSuccess()
+        {
+            return View(); // Tạo View báo thành công
         }
     }
 }

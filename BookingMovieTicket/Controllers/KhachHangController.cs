@@ -140,7 +140,7 @@ namespace BookingMovieTicket.Controllers
                .ToList();
 
             var model =  dsDonHang
-                        .Where(d => d.ChiTietDonDatVes != null && d.ChiTietDonDatVes.Any())
+                        .Where(d => d.ChiTietDonDatVes != null && d.ChiTietDonDatVes.Any()&&d.TrangThai=="Đã thanh toán")
                         .Select(don => new LichSuDatVeVM
                         {
                             MaDon = don.MaDon,
