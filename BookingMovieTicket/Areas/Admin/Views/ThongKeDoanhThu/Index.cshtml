@@ -1,0 +1,125 @@
+﻿@model List<BookingMovieTicket.ViewModels.ThongKeDoanhThuVM>
+
+@{
+    ViewData["Title"] = "Thống kê doanh thu";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Thống Kê Doanh Thu</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Báo cáo doanh thu theo Rạp & Phim</li>
+    </ol>
+
+    <div class="row mb-4">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Biểu đồ doanh thu top phim
+                </div>
+                <div class="card-body">
+                    <canvas id="myBarChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Chi tiết doanh thu
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Tên Rạp</th>
+                        <th>Tên Phim</th>
+                        <th class="text-center">Số Vé Đã Bán</th>
+                        <th class="text-end">Tổng Doanh Thu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.TenRap</td>
+                                <td class="fw-bold">@item.TenPhim</td>
+                                <td class="text-center">@item.SoVeDaBan</td>
+                                <td class="text-end text-danger fw-bold">
+                                    @item.TongDoanhThu.ToString("#,##0") VNĐ
+                                </td>
+                            </tr>
+                        }
+                        <tr class="table-secondary fw-bold">
+                            <td colspan="2" class="text-end">TỔNG CỘNG TẤT CẢ:</td>
+                            <td class="text-center">@Model.Sum(x => x.SoVeDaBan)</td>
+                            <td class="text-end text-danger">@Model.Sum(x => x.TongDoanhThu).ToString("#,##0") VNĐ</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center">Chưa có dữ liệu doanh thu nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+
+<script>
+    // Chuẩn bị dữ liệu cho biểu đồ từ Model Razor
+    // Lấy danh sách tên phim (Unique) để làm nhãn
+    var labels = @Html.Raw(Json.Serialize(Model.Select(x => x.TenPhim + " (" + x.TenRap + ")").ToList()));
+    var dataRevenue = @Html.Raw(Json.Serialize(Model.Select(x => x.TongDoanhThu).ToList()));
+
+    // Vẽ biểu đồ
+    var ctx = document.getElementById("myBarChart");
+    var myLineChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Doanh thu",
+                backgroundColor: "rgba(2,117,216,1)",
+                borderColor: "rgba(2,117,216,1)",
+                data: dataRevenue,
+            }],
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    gridLines: { display: false },
+                    ticks: { maxTicksLimit: 10 }
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        maxTicksLimit: 5,
+                        // Format tiền tệ trục Y
+                        callback: function(value, index, values) {
+                            return value.toLocaleString('vi-VN') + ' đ';
+                        }
+                    },
+                    gridLines: { display: true }
+                }],
+            },
+            legend: { display: false },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, chart) {
+                        var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                        return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString('vi-VN') + ' đ';
+                    }
+                }
+            }
+        }
+    });
+</script>

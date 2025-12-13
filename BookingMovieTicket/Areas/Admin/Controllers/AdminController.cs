@@ -69,5 +69,14 @@ namespace BookingMovieTicket.Controllers
             }
             return View();
         }
+
+        [Authorize]
+        public async Task<IActionResult> DangXuat()
+        {
+            await HttpContext.SignOutAsync();
+            HttpContext.Session.Remove("NguoiDung");
+
+            return Redirect("/Admin");
+        }
     }
 }

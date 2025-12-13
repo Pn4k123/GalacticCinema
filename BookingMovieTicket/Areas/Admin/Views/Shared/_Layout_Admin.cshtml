@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Newtonsoft.Json
+<!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
@@ -59,36 +60,41 @@
                     </li>
 
                     <li class="mb-2">
-                        <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
-                            <span class="material-icons me-3 text-secondary">movie</span>
+                        <a asp-area="Admin" asp-controller="QuanLyRap" asp-action="Index"
+                            class="d-flex align-items-center p-3 rounded text-dark text-decoration-none @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyRap" ? "active" : "")">
+                            <span class="material-icons me-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyRap" ? "text-primary" : "text-secondary")">movie</span>
                             Quản lý Rạp
                         </a>
                     </li>
 
                     <li class="mb-2">
-                        <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
-                            <span class="material-icons me-3 text-secondary">schedule</span>
+                        <a asp-area="Admin" asp-controller="QuanLySuatChieu" asp-action="Index"
+                            class="d-flex align-items-center p-3 rounded text-dark text-decoration-none @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLySuatChieu" ? "active" : "")">
+                            <span class="material-icons me-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLySuatChieu" ? "text-primary" : "text-secondary")">schedule</span>
                             Quản lý Suất chiếu
                         </a>
                     </li>
 
                     <li class="mb-2">
-                        <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
-                            <span class="material-icons me-3 text-secondary">meeting_room</span>
+                        <a asp-area="Admin" asp-controller="QuanLyPhong" asp-action="Index"
+                            class="d-flex align-items-center p-3 rounded text-dark text-decoration-none @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyPhong" ? "active" : "")">
+                            <span class="material-icons me-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyPhong" ? "text-primary" : "text-secondary")">meeting_room</span>
                             Quản lý Phòng
                         </a>
                     </li>
 
                     <li class="mb-2">
-                        <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
-                            <span class="material-icons me-3 text-secondary">chair</span>
+                        <a asp-area="Admin" asp-controller="QuanLyGhe" asp-action="Index"
+                            class="d-flex align-items-center p-3 rounded text-dark text-decoration-none @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyGhe" ? "active" : "")">
+                            <span class="material-icons me-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyGhe" ? "text-primary" : "text-secondary")">chair</span>
                             Quản lý Ghế
                         </a>
                     </li>
 
                     <li class="mb-2">
-                        <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
-                            <span class="material-icons me-3 text-secondary">bar_chart</span>
+                        <a asp-area="Admin" asp-controller="ThongKeDoanhThu" asp-action="Index"
+                            class="d-flex align-items-center p-3 rounded text-dark text-decoration-none @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKeDoanhThu" ? "active" : "")">
+                            <span class="material-icons me-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKeDoanhThu" ? "text-primary" : "text-secondary")">bar_chart</span>
                             Thống kê doanh thu
                         </a>
                     </li>
@@ -105,15 +111,25 @@
             </nav>
 
             <div class="border-top mt-auto p-3">
-                <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
-                    <span class="material-icons me-3 text-secondary">login</span>
-                    Đăng nhập
-                </a>
+                @{
+                    var session = Context.Session.GetString("NguoiDung");
+                    if(session != null)
+                    {
+                        NguoiDung admin = JsonConvert.DeserializeObject<NguoiDung>(session);
 
-                <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
-                    <span class="material-icons me-3 text-secondary">person_add</span>
-                    Đăng xuất
-                </a>
+                        <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
+                            <span class="material-icons me-3 text-secondary">login</span>
+                            @admin.HoTen
+                        </a>
+
+                        <a asp-action="DangXuat" asp-controller="Admin"
+                        class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
+                            <span class="material-icons me-3 text-secondary">person_add</span>
+                            Đăng xuất
+                        </a>
+                    }
+                }
+               
             </div>
 
         </aside>
