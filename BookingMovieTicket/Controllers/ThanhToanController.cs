@@ -11,10 +11,14 @@ namespace BookingMovieTicket.Controllers
     {
         private readonly QuanLyDatVePhimContext db;
         private readonly IVnPayService _vnPayService;
+        private readonly IConfiguration _config;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public ThanhToanController(QuanLyDatVePhimContext context, IVnPayService vnPayService) {
+        public ThanhToanController(QuanLyDatVePhimContext context, IVnPayService vnPayService,IConfiguration configuration,IServiceScopeFactory serviceScopeFactory) {
             db = context;
             _vnPayService = vnPayService;
+            _config = configuration;
+            _scopeFactory = serviceScopeFactory;
         }
         public IActionResult Index(string maDon)
         {
@@ -120,6 +124,7 @@ namespace BookingMovieTicket.Controllers
 
                 db.SaveChanges();
 
+                GuiEmailVePhim(maDon);
                 return RedirectToAction("PaymentSuccess");
             }
         }
@@ -153,7 +158,7 @@ namespace BookingMovieTicket.Controllers
                     };
                     db.ThanhToans.Add(thanhToan);
                     db.SaveChanges();
-
+                    GuiEmailVePhim(maDon);
                     return RedirectToAction("PaymentSuccess");
                 }
             }
@@ -167,5 +172,76 @@ namespace BookingMovieTicket.Controllers
         {
             return View(); // Tạo View báo thành công
         }
+
+        // Hàm phụ trợ gửi email (Chạy ngầm)
+        private void GuiEmailVePhim(string maDon)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    // TẠO SCOPE MỚI -> TẠO DB CONTEXT MỚI
+                    using (var scope = _scopeFactory.CreateScope())
+                    {
+                        var dbContext = scope.ServiceProvider.GetRequiredService<QuanLyDatVePhimContext>();
+
+                        // 1. Query dữ liệu bằng dbContext MỚI này (Không dùng biến 'db' cũ)
+                        var donHang = await dbContext.DonDatVes
+                            .Include(d => d.ChiTietDonDatVes).ThenInclude(ct => ct.MaVeNavigation).ThenInclude(v => v.MaSuatChieuNavigation).ThenInclude(s => s.MaPhimNavigation)
+                            .Include(d => d.ChiTietDonDatVes).ThenInclude(ct => ct.MaVeNavigation).ThenInclude(v => v.MaSuatChieuNavigation).ThenInclude(s => s.MaPhongNavigation).ThenInclude(r => r.MaRapNavigation)
+                            .Include(d => d.ChiTietDonDatVes) .ThenInclude(ct => ct.MaVeNavigation).ThenInclude(v => v.MaGheNavigation)
+                            .FirstOrDefaultAsync(d => d.MaDon == maDon);
+
+                        if (donHang == null) return;
+
+                        // Lấy user
+                        var nguoiDung = await dbContext.NguoiDungs.FindAsync(donHang.MaNd);
+                        if (nguoiDung == null || string.IsNullOrEmpty(nguoiDung.Email)) return;
+
+                        // 2. Chuẩn bị dữ liệu email
+                        var veDau = donHang.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation;
+                        string tenPhim = veDau?.MaSuatChieuNavigation.MaPhimNavigation.TenPhim ?? "Phim";
+                        string rap = veDau?.MaSuatChieuNavigation.MaPhongNavigation.MaRapNavigation.TenRap ?? "";
+                        string phong = veDau?.MaSuatChieuNavigation.MaPhongNavigation.TenPhong ?? "";
+                        string suat = $"{veDau?.MaSuatChieuNavigation.GioChieu} - {veDau?.MaSuatChieuNavigation.NgayChieu:dd/MM/yyyy}";
+
+                        var listGhe = donHang.ChiTietDonDatVes.Select(ct => ct.MaVeNavigation.MaGheNavigation.HangGhe + ct.MaVeNavigation.MaGheNavigation.SoGhe).ToList();
+                        string gheStr = string.Join(", ", listGhe);
+                        decimal tongTien = donHang.ChiTietDonDatVes.Sum(x => x.GiaVe);
+
+                        // 3. Tạo QR Code
+                        var emailHelper = new EmailHelper(_config);
+                        string qrCodeImage = emailHelper.GenerateQrCode("MaDon:" + donHang.MaDon);
+
+                        // 4. Nội dung HTML
+                        string content = $@"
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
+                            <h2 style='color: #28a745; text-align: center;'>ĐẶT VÉ THÀNH CÔNG</h2>
+                            <p>Xin chào <strong>{nguoiDung.HoTen}</strong>,</p>
+                            <p>Thông tin vé của bạn:</p>
+                            <table style='width: 100%; border-collapse: collapse;'>
+                                <tr><td><strong>Phim:</strong></td><td>{tenPhim}</td></tr>
+                                <tr><td><strong>Rạp/Phòng:</strong></td><td>{rap} - {phong}</td></tr>
+                                <tr><td><strong>Suất:</strong></td><td>{suat}</td></tr>
+                                <tr><td><strong>Ghế:</strong></td><td style='color:red; font-weight:bold'>{gheStr}</td></tr>
+                                <tr><td><strong>Tổng tiền:</strong></td><td>{tongTien:N0} VNĐ</td></tr>
+                            </table>
+                            <div style='text-align: center; margin: 20px 0;'>
+                                <img src='cid:qrcode' alt='QR Code' width='200' style='border: 5px solid #eee;' />
+                                <p>Mã đơn: {donHang.MaDon}</p>
+                            </div>
+                        </div>";
+
+                        // 5. Gửi Email
+                        await emailHelper.SendTicketEmail(nguoiDung.Email, "[Galactic Cinema] Vé điện tử", content, qrCodeImage);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            });
+        }
+           
     }
 }
