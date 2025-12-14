@@ -4,6 +4,7 @@ using BookingMovieTicket.Services;
 using BookingMovieTicket.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace BookingMovieTicket.Controllers
 {
@@ -11,12 +12,14 @@ namespace BookingMovieTicket.Controllers
     {
         private readonly QuanLyDatVePhimContext db;
         private readonly IVnPayService _vnPayService;
+        private readonly IZaloPayService _zaloPayService;
         private readonly IConfiguration _config;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public ThanhToanController(QuanLyDatVePhimContext context, IVnPayService vnPayService,IConfiguration configuration,IServiceScopeFactory serviceScopeFactory) {
+        public ThanhToanController(QuanLyDatVePhimContext context, IVnPayService vnPayService,IZaloPayService zaloPayService,IConfiguration configuration,IServiceScopeFactory serviceScopeFactory) {
             db = context;
             _vnPayService = vnPayService;
+            _zaloPayService = zaloPayService;
             _config = configuration;
             _scopeFactory = serviceScopeFactory;
         }
@@ -66,65 +69,62 @@ namespace BookingMovieTicket.Controllers
         }
 
         [HttpPost]
-        public IActionResult ProcessPayment(string maDon, string phuongThuc)
+        public async Task<IActionResult> ProcessPaymentAsync(string maDon, string phuongThuc)
         {
-            // 1. Tìm đơn hàng
-            var donHang = db.DonDatVes
-                .Include(d => d.ChiTietDonDatVes) // Load chi tiết để kiểm tra vé
-                .FirstOrDefault(d => d.MaDon == maDon);
+            var donHang = db.DonDatVes.Include(d => d.ChiTietDonDatVes).FirstOrDefault(d => d.MaDon == maDon);
 
-            if (donHang == null)
-            {
-                return NotFound();
-            }
-
+            if (donHang == null) return NotFound();
             if (donHang.TrangThai != "Đang chờ")
             {
-                // Trả về view báo lỗi hoặc thông báo cho người dùng
-                ViewBag.Message = "Giao dịch thất bại! Đơn hàng đã bị hủy do quá thời gian thanh toán hoặc đã được xử lý.";
-                return View("PaymentError"); 
-            }
-
-            //Kiểm tra xem Vé trong bảng Ve còn tồn tại không?
-            // Vì Background Service đã xóa vé để nhả ghế, nên ta phải check lại.
-            var danhSachMaVe = donHang.ChiTietDonDatVes.Select(ct => ct.MaVe).ToList();
-            var soLuongVeTrongDb = db.Ves.Count(v => danhSachMaVe.Contains(v.MaVe));
-
-            if (soLuongVeTrongDb != donHang.ChiTietDonDatVes.Count)
-            {
-                // Trường hợp hiếm: Đơn chưa đổi trạng thái nhưng vé đã bị xóa
-                donHang.TrangThai = "Đã hủy";
-                db.SaveChanges();
-
-                ViewBag.Message = "Giao dịch thất bại! Ghế ngồi đã bị giải phóng do quá hạn.";
+                ViewBag.Message = "Giao dịch thất bại! Đơn hàng đã hết hạn hoặc đã được xử lý.";
                 return View("PaymentError");
             }
 
+            // Kiểm tra vé tồn tại (Quan trọng)
+            var danhSachMaVe = donHang.ChiTietDonDatVes.Select(ct => ct.MaVe).ToList();
+            var soLuongVeTrongDb = db.Ves.Count(v => danhSachMaVe.Contains(v.MaVe));
+            if (soLuongVeTrongDb != donHang.ChiTietDonDatVes.Count)
+            {
+                donHang.TrangThai = "Đã hủy";
+                db.SaveChanges();
+                ViewBag.Message = "Giao dịch thất bại! Ghế ngồi đã bị giải phóng.";
+                return View("PaymentError");
+            }
+
+            // 2. Phân chia luồng xử lý theo phương thức
             if (phuongThuc == "VNPay")
             {
                 var vnPayModel = new VnPaymentRequestModel
                 {
                     donHang = donHang
+                    // Lưu ý: VnPayService của bạn cần set ReturnUrl trỏ về action "PaymentCallback"
                 };
                 string paymentUrl = _vnPayService.CreatePaymentUrl(HttpContext, vnPayModel);
                 return Redirect(paymentUrl);
             }
-            else {
-                donHang.TrangThai = "Đã thanh toán";
+            else if (phuongThuc == "ZaloPay")
+            {
 
-                // 5. Lưu lịch sử thanh toán
-                var thanhToan = new ThanhToan
+                // 2. Gọi Service tạo đơn (Async)
+                var result = await _zaloPayService.CreateOrderAsync(donHang);
+
+                if (result != null && result.ReturnCode == 1)
                 {
-                    MaDon = maDon,
-                    PhuongThuc = phuongThuc,
-                    ThoiGian = DateTime.Now,
-                    TrangThai = "Thành công"
-                };
-                db.ThanhToans.Add(thanhToan);
+                    return Redirect(result.OrderUrl); // Chuyển sang trang thanh toán Zalo
+                }
+                else
+                {
+                    var errorMsg = result == null ? "Không nhận được phản hồi từ ZaloPay" :
+                       $"{result.ReturnMessage} (SubCode: {result.SubReturnCode} - {result.SubReturnMessage})";
 
-                db.SaveChanges();
-
-                GuiEmailVePhim(maDon);
+                    ViewBag.Message = $"Lỗi ZaloPay: {errorMsg}";
+                    return View("PaymentError");
+                }
+            }
+            else
+            {
+                // Thanh toán trực tiếp
+                XuLyThanhToanThanhCong(maDon, phuongThuc);
                 return RedirectToAction("PaymentSuccess");
             }
         }
@@ -142,31 +142,83 @@ namespace BookingMovieTicket.Controllers
             // Xử lý khi thành công (00)
             if (response.VnPayResponseCode == "00")
             {
-                var maDon = response.OrderId; // Đây là MaDon (GUID string)
-                var donHang = db.DonDatVes.FirstOrDefault(d => d.MaDon == maDon);
-
-                if (donHang != null)
-                {
-                    donHang.TrangThai = "Đã thanh toán";
-
-                    var thanhToan = new ThanhToan
-                    {
-                        MaDon = maDon,
-                        PhuongThuc = "VNPay",
-                        ThoiGian = DateTime.Now,
-                        TrangThai = "Thành công"
-                    };
-                    db.ThanhToans.Add(thanhToan);
-                    db.SaveChanges();
-                    GuiEmailVePhim(maDon);
-                    return RedirectToAction("PaymentSuccess");
-                }
+                // VNPay trả về OrderId chính là MaDon nên dùng trực tiếp được
+                bool ketQua = XuLyThanhToanThanhCong(response.OrderId, "VNPay");
+                if (ketQua) return RedirectToAction("PaymentSuccess");
             }
 
             ViewBag.Message = $"Giao dịch thất bại. Mã lỗi: {response.VnPayResponseCode}";
             return View("PaymentError");
         }
-        
+
+        public IActionResult ZaloPaymentCallback(string maDon)
+        {
+            Console.WriteLine("--- ZaloPay Callback Called ---");
+            Console.WriteLine($"Ma Don nhan duoc: {maDon}");
+            Console.WriteLine($"Query String: {Request.QueryString}");
+
+            // 1. Verify Checksum
+            var result = _zaloPayService.PaymentExecute(Request.Query);
+
+            if (!result.Success)
+            {
+                ViewBag.Message = $"Lỗi Checksum ZaloPay: {result.Message}";
+                return View("PaymentError");
+            }
+
+            // 2. Kiểm tra status (1 = Thành công)
+            if (result.Status == 1)
+            {
+                if (string.IsNullOrEmpty(maDon))
+                {
+                    ViewBag.Message = "Thanh toán thành công nhưng không tìm thấy mã đơn hàng.";
+                    return View("PaymentError");
+                }
+
+                // 3. Xử lý lưu vé
+                bool ketQua = XuLyThanhToanThanhCong(maDon, "ZaloPay");
+
+                if (ketQua)
+                {
+                    return RedirectToAction("PaymentSuccess");
+                }
+                else
+                {
+                    // Trường hợp vé đã được xử lý từ trước hoặc lỗi DB
+                    // Vẫn cho là thành công để khách đỡ hoang mang, nhưng ghi log lại
+                    return RedirectToAction("PaymentSuccess");
+                }
+            }
+
+            ViewBag.Message = "Giao dịch ZaloPay thất bại hoặc bị hủy.";
+            return View("PaymentError");
+        }
+
+        private bool XuLyThanhToanThanhCong(string maDon, string phuongThuc)
+        {
+            var donHang = db.DonDatVes.FirstOrDefault(d => d.MaDon == maDon);
+            if (donHang != null)
+            {
+                // Kiểm tra nếu đã thanh toán rồi thì thôi (tránh double request)
+                if (donHang.TrangThai == "Đã thanh toán") return true;
+
+                donHang.TrangThai = "Đã thanh toán";
+                var thanhToan = new ThanhToan
+                {
+                    MaDon = maDon,
+                    PhuongThuc = phuongThuc,
+                    ThoiGian = DateTime.Now,
+                    TrangThai = "Thành công"
+                };
+                db.ThanhToans.Add(thanhToan);
+                db.SaveChanges();
+
+                GuiEmailVePhim(maDon); // Gửi mail background
+                return true;
+            }
+            return false;
+        }
+
 
         public IActionResult PaymentSuccess()
         {
@@ -242,6 +294,11 @@ namespace BookingMovieTicket.Controllers
                 }
             });
         }
-           
+
+        private string RandomTransId()
+        {
+            return DateTime.Now.ToString("yyMMdd") + "_" + Guid.NewGuid().ToString().Substring(0, 10);
+        }
+
     }
 }
