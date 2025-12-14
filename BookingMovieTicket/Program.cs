@@ -37,6 +37,8 @@ builder.Services.AddHostedService<BookingMovieTicket.Services.VeAutoCleanerServi
 
 builder.Services.AddSingleton<IVnPayService, VnPayService>();
 
+builder.Services.AddScoped<BookingMovieTicket.Services.IZaloPayService, BookingMovieTicket.Services.ZaloPayService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

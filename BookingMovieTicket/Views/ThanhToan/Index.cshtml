@@ -28,18 +28,35 @@
         border: 1px solid #ddd;
         border-radius: 8px;
         padding: 15px;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         cursor: pointer;
         transition: 0.2s;
         display: flex;
         align-items: center;
         gap: 15px;
+        position: relative;
     }
 
-        .method-card:hover, .method-card.active {
-            border-color: #28a745;
-            background-color: #f0fff4;
+        .method-card:hover {
+            background-color: #f8f9fa;
+            border-color: #aaa;
         }
+
+        .method-card.active {
+            border-color: #007bff;
+            background-color: #e7f1ff;
+            box-shadow: 0 0 5px rgba(0,123,255,0.3);
+        }
+
+            /* Dấu tích xanh khi chọn */
+            .method-card.active::after {
+                content: '✔';
+                position: absolute;
+                right: 15px;
+                color: #007bff;
+                font-weight: bold;
+                font-size: 1.2rem;
+            }
 
     .ticket-summary {
         background: #f8f9fa;
@@ -47,20 +64,13 @@
         border-radius: 8px;
         border-left: 5px solid #007bff;
     }
-
-    .qr-placeholder {
-        width: 150px;
-        height: 150px;
-        margin: 0 auto;
-        display: block;
-    }
 </style>
 
 <div class="container">
     <div class="payment-container">
 
         <div class="timer-box">
-            Thời gian giữ ghế còn lại: <span id="countdown" style="font-size: 1.2rem;">10:00</span>
+            <i class="fa fa-clock-o"></i> Thời gian giữ ghế còn lại: <span id="countdown" style="font-size: 1.2rem;">10:00</span>
         </div>
 
         <div class="row">
@@ -69,31 +79,40 @@
 
                 <form asp-action="ProcessPayment" method="post" id="paymentForm">
                     <input type="hidden" name="maDon" value="@Model.MaDon" />
-                    <input type="hidden" name="phuongThuc" id="selectedMethod" value="Momo" />
+                    <input type="hidden" name="phuongThuc" id="selectedMethod" value="ZaloPay" />
 
-                    <div class="method-card active" onclick="selectMethod(this, 'Momo')">
-                        <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" width="40" alt="Momo">
+                    <div class="method-card active" onclick="selectMethod(this, 'ZaloPay')">
+                        <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png" width="50" alt="ZaloPay" style="border-radius: 8px;">
                         <div>
-                            <strong>Ví điện tử Momo</strong><br>
-                            <small class="text-muted">Quét mã QR để thanh toán ngay</small>
+                            <strong>Ví điện tử ZaloPay</strong><br>
+                            <small class="text-muted">Thanh toán nhanh chóng qua ứng dụng Zalo</small>
                         </div>
                     </div>
 
                     <div class="method-card" onclick="selectMethod(this, 'VNPay')">
-                        <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/9/06ncktiwd6dc1694418196384.png" width="40" alt="VNPay">
+                        <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/9/06ncktiwd6dc1694418196384.png" width="50" alt="VNPay" style="border-radius: 8px;">
                         <div>
                             <strong>VNPay QR</strong><br>
-                            <small class="text-muted">Hỗ trợ tất cả ngân hàng</small>
+                            <small class="text-muted">Quét mã QR từ ứng dụng ngân hàng</small>
                         </div>
                     </div>
 
-                    <div class="text-center mt-4 p-3 border rounded bg-light" id="qrArea">
-                        <p>Quét mã để thanh toán:</p>
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ThanhToanDonhang:@Model.MaDon" class="qr-placeholder" alt="QR Code" />
-                        <p class="mt-2 text-danger fw-bold">@Model.TongTien.ToString("N0") đ</p>
+                    @* <div class="method-card" onclick="selectMethod(this, 'TienMat')">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" width="50" alt="Cash">
+                        <div>
+                            <strong>Thanh toán tại quầy</strong><br>
+                            <small class="text-muted">Thanh toán trực tiếp khi nhận vé</small>
+                        </div>
+                    </div> 
+                    *@
+
+                    <div class="alert alert-info mt-3">
+                        <small><i class="fa fa-info-circle"></i> Bạn sẽ được chuyển hướng sang trang thanh toán của đối tác sau khi nhấn nút bên dưới.</small>
                     </div>
 
-                    <button type="submit" class="btn btn-success w-100 btn-lg mt-4">THANH TOÁN</button>
+                    <button type="submit" class="btn btn-success w-100 btn-lg mt-3 fw-bold">
+                        THANH TOÁN @Model.TongTien.ToString("N0") VNĐ
+                    </button>
                 </form>
             </div>
 
@@ -122,13 +141,18 @@
 <script>
     // 1. Logic chọn phương thức
     function selectMethod(element, method) {
+        // Xóa class active ở tất cả các thẻ
         document.querySelectorAll('.method-card').forEach(el => el.classList.remove('active'));
+
+        // Thêm class active vào thẻ được chọn
         element.classList.add('active');
+
+        // Cập nhật giá trị cho input hidden để gửi về Controller
         document.getElementById('selectedMethod').value = method;
     }
 
     // 2. Logic đếm ngược (10 phút)
-    let time = 10 * 60; // 10 phút tính bằng giây
+    let time = 10 * 60;
     const countdownEl = document.getElementById('countdown');
 
     const timer = setInterval(() => {
@@ -143,7 +167,7 @@
         } else {
             clearInterval(timer);
             alert("Hết thời gian giữ ghế! Vui lòng đặt lại.");
-            window.location.href = "/"; // Quay về trang chủ
+            window.location.href = "/";
         }
     }, 1000);
 </script>
