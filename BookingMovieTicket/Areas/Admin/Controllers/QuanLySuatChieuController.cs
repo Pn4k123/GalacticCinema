@@ -33,8 +33,30 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult them(SuatChieu suatChieu)
         {
-            if (suatChieu == null)
-                return BadRequest();
+            // 1. Xóa validation không cần thiết
+            ModelState.Remove("MaPhimNavigation");
+            ModelState.Remove("MaPhongNavigation");
+            ModelState.Remove("Ves");
+
+            if (suatChieu == null) return BadRequest();
+
+            // 2. KIỂM TRA MÃ SUẤT CHIẾU
+            if (string.IsNullOrWhiteSpace(suatChieu.MaSuatChieu))
+            {
+                ModelState.AddModelError(nameof(suatChieu.MaSuatChieu), "Vui lòng nhập mã suất chiếu.");
+            }
+            else
+            {
+                // Check độ dài: Database chỉ cho phép tối đa 10 ký tự
+                if (suatChieu.MaSuatChieu.Length > 10)
+                {
+                    ModelState.AddModelError(nameof(suatChieu.MaSuatChieu), "Mã suất chiếu không được quá 10 ký tự.");
+                }
+                else if (db.SuatChieus.Any(s => s.MaSuatChieu == suatChieu.MaSuatChieu))
+                {
+                    ModelState.AddModelError(nameof(suatChieu.MaSuatChieu), "Mã suất chiếu đã tồn tại.");
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(suatChieu.MaPhim))
                 ModelState.AddModelError(nameof(suatChieu.MaPhim), "Vui lòng chọn phim.");
@@ -48,7 +70,6 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
             if (suatChieu.GioChieu == default)
                 ModelState.AddModelError(nameof(suatChieu.GioChieu), "Vui lòng chọn giờ chiếu.");
 
-            // check duplicate exact time in same room
             if (ModelState.IsValid)
             {
                 var exists = db.SuatChieus.Any(s =>
@@ -57,23 +78,32 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
                     && s.GioChieu == suatChieu.GioChieu);
 
                 if (exists)
-                    ModelState.AddModelError(string.Empty, "Đã tồn tại suất chiếu cùng ngày/giờ trong phòng này.");
+                    ModelState.AddModelError("", "Đã có suất chiếu tại phòng này vào giờ này.");
             }
 
             if (!ModelState.IsValid)
             {
-                ViewBag.DSPhim = new SelectList(db.Phims.ToList(), "MaPhim", "TenPhim", suatChieu?.MaPhim);
-                ViewBag.DSPhong = new SelectList(db.Phongs.ToList(), "MaPhong", "TenPhong", suatChieu?.MaPhong);
+                ViewBag.DSPhim = new SelectList(db.Phims.ToList(), "MaPhim", "TenPhim", suatChieu.MaPhim);
+                ViewBag.DSPhong = new SelectList(db.Phongs.ToList(), "MaPhong", "TenPhong", suatChieu.MaPhong);
                 return View(suatChieu);
             }
 
-            // generate MaSuatChieu (keeps length reasonable)
-            suatChieu.MaSuatChieu = "SC" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            try
+            {
+                db.SuatChieus.Add(suatChieu);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                // HIỆN CHI TIẾT LỖI RA MÀN HÌNH ĐỂ BẠN ĐỌC
+                var fullError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                ModelState.AddModelError("", "Lỗi lưu Database: " + fullError);
 
-            db.SuatChieus.Add(suatChieu);
-            db.SaveChanges();
-
-            return RedirectToAction("Index");
+                ViewBag.DSPhim = new SelectList(db.Phims.ToList(), "MaPhim", "TenPhim", suatChieu.MaPhim);
+                ViewBag.DSPhong = new SelectList(db.Phongs.ToList(), "MaPhong", "TenPhong", suatChieu.MaPhong);
+                return View(suatChieu);
+            }
         }
     }
 }

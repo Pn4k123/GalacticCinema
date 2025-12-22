@@ -1,18 +1,17 @@
-﻿@model BookingMovieTicket.Models.Phong
+﻿@model BookingMovieTicket.Models.DonDatVe
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
 }
-
 <header class="bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
     <div>
-        <h2 class="h2 fw-bold text-dark">Danh sách Phòng</h2>
+        <h2 class="h2 fw-bold text-dark">Danh sách Đơn vé</h2>
     </div>
     <div class="d-flex align-items-center gap-3">
         <a asp-action="them" class="btn btn-primary d-flex align-items-center">
             <span class="material-icons me-2">add</span>
-            Thêm Phòng Mới
+            Thêm Đơn Vé Mới
         </a>
     </div>
 </header>
@@ -22,29 +21,26 @@
         <table class="table table-bordered align-middle text-nowrap">
             <thead class="table-light">
                 <tr>
-                    <th><label asp-for="MaPhong" class="text-muted small text-uppercase fw-semibold"></label></th>
-                    <th><label asp-for="MaRap" class="text-muted small text-uppercase fw-semibold"></label></th>
-                    <th><label asp-for="TenPhong" class="text-muted small text-uppercase fw-semibold"></label></th>
+                    <th><label asp-for="MaDon" class="text-muted small text-uppercase fw-semibold"></label></th>
+                    <th><label asp-for="MaNd" class="text-muted small text-uppercase fw-semibold"></label></th>
+                    <th><label asp-for="ThoiGianDat" class="text-muted small text-uppercase fw-semibold"></label></th>
                     <th><label asp-for="TrangThai" class="text-muted small text-uppercase fw-semibold"></label></th>
-
-
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in ViewBag.qlphong)
+                @foreach (var item in ViewBag.qldonve)
                 {
                     <tr>
-                        <td class="fw-semibold">@item.MaPhong</td>
-                        <td class="fw-semibold">@item.MaRap</td>
-                        <td>@item.TenPhong</td>
+                        <td class="fw-semibold">@item.MaDon</td>
+                        <td class="fw-semibold">@item.MaNd</td>
+                        <td>@item.ThoiGianDat</td>
                         <td>@item.TrangThai</td>
-
                         <td>
                             <div class="d-flex gap-2">
-                                <a asp-action="sua" asp-route-id="@item.MaPhong" class="btn btn-success btn-sm">
+                                <a asp-action="sua" asp-route-id="@item.MaDon" class="btn btn-success btn-sm">
                                     Sửa
                                 </a>
-                                <a asp-action="xoa" asp-route-id="@item.MaPhong" class="btn btn-danger btn-sm">
+                                <a asp-action="xoa" asp-route-id="@item.MaDon" class="btn btn-danger btn-sm">
                                     Xóa
                                 </a>
                             </div>

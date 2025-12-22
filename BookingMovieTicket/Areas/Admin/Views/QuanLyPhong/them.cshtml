@@ -21,6 +21,7 @@
     <br />
     <div class="container">
         <form asp-action="them" method="post" enctype="multipart/form-data" asp-area="Admin">
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="row">
                 <div class="col">
@@ -43,12 +44,14 @@
                     <span asp-validation-for="TenPhong" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="TrangThai" class="control-label"></label>
+                    <label asp-for="TrangThai" class="control-label">Trạng thái</label>
                     <select asp-for="TrangThai" class="form-select">
                         <option value="">-- Chọn trạng thái --</option>
+
                         <option value="Hoạt động">Hoạt động</option>
-                        <option value="Không hoạt động">Không hoạt động</option>
-                    </select>                    
+                        <option value="Bảo trì">Bảo trì</option>
+
+                    </select>
                     <span asp-validation-for="TrangThai" class="text-danger"></span>
                 </div>
             </div>

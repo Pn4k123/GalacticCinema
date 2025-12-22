@@ -107,6 +107,14 @@
                         </a>
                     </li>
 
+                    <li class="mb-2">
+                        <a asp-area="Admin" asp-controller="QuanLyDonVe" asp-action="Index"
+                           class="d-flex align-items-center p-3 rounded text-dark text-decoration-none @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyDonVe" ? "active" : "")">
+                            <span class="material-icons me-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "QuanLyDonVe" ? "text-primary" : "text-secondary")">local_activity</span>
+                            Quản lý đơn vé
+                        </a>
+                    </li>
+
                 </ul>
             </nav>
 

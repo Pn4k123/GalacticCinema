@@ -1,12 +1,9 @@
 ﻿@using BookingMovieTicket.Models
 @model BookingMovieTicket.Models.SuatChieu
-@using BookingMovieTicket.ViewModels;
-
 @{
     ViewData["Title"] = "them";
     Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
 }
-
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -22,6 +19,7 @@
     <br />
     <div class="container">
         <form asp-action="them" method="post" enctype="multipart/form-data" asp-area="Admin">
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="row">
                 <div class="col">
@@ -29,36 +27,52 @@
                     <input asp-for="MaSuatChieu" class="form-control" />
                     <span asp-validation-for="MaSuatChieu" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="MaPhong" class="control-label"></label>
                     <select asp-for="MaPhong" asp-items="ViewBag.DSPhong" class="form-select">
                         <option value="">-- Chọn phòng --</option>
-                    </select>                    
+                    </select>
                     <span asp-validation-for="MaPhong" class="text-danger"></span>
                 </div>
+
                 <div class="form-group">
                     <label asp-for="MaPhim" class="control-label"></label>
                     <select asp-for="MaPhim" asp-items="ViewBag.DSPhim" class="form-select">
                         <option value="">-- Chọn phim --</option>
-                    </select>                     
+                    </select>
                     <span asp-validation-for="MaPhim" class="text-danger"></span>
                 </div>
+
+                <!-- ADDED: Date and Time inputs -->
                 <div class="form-group">
-                    <label asp-for="TrangThai" class="control-label"></label>
+                    <label asp-for="NgayChieu" class="control-label"></label>
+                    <input asp-for="NgayChieu" type="date" class="form-control" />
+                    <span asp-validation-for="NgayChieu" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GioChieu" class="control-label"></label>
+                    <input asp-for="GioChieu" type="time" class="form-control" />
+                    <span asp-validation-for="GioChieu" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="TrangThai" class="control-label">Trạng thái</label>
                     <select asp-for="TrangThai" class="form-select">
                         <option value="">-- Chọn trạng thái --</option>
+
+                        <option value="Sắp chiếu">Sắp chiếu</option>
+                        <option value="Đang chiếu">Đang chiếu</option>
                         <option value="Đã chiếu">Đã chiếu</option>
-                        <option value="Chưa chiếu">Chưa chiếu</option>
-                    </select>                         
+                    </select>
                     <span asp-validation-for="TrangThai" class="text-danger"></span>
                 </div>
             </div>
             <div class="form-group mt-3">
                 <input type="submit" class="btn btn-primary" value="Save" />
             </div>
-            <div>
-                <a asp-action="Index">Quay lại</a>
-            </div>
+            <div><a asp-action="Index">Quay lại</a></div>
         </form>
     </div>
 </body>

@@ -3,7 +3,7 @@ name: 🚀 Deploy to Somee
 on:
   push:
     branches:
-      - main   # Chạy khi push lên nhánh main (bạn có thể đổi sang nhánh khác)
+      - main   
 
 jobs:
   deploy:

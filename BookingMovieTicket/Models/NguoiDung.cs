@@ -6,6 +6,7 @@ namespace BookingMovieTicket.Models;
 
 public partial class NguoiDung
 {
+    [DisplayName("Mã người dùng")]
     public string MaNd { get; set; } = null!;
     [DisplayName("Email")]
     public string Email { get; set; } = null!;
