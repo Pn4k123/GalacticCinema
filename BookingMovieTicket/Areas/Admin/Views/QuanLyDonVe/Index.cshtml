@@ -15,40 +15,102 @@
         </a>
     </div>
 </header>
+
+<!-- Thanh tìm kiếm -->
+<div class="bg-white border-bottom p-4">
+    <form method="get" asp-action="Index" class="d-flex gap-2">
+        <div class="flex-grow-1">
+            <input type="text"
+                   name="tuKhoa"
+                   class="form-control"
+                   placeholder="Tìm kiếm theo Mã đơn, Mã người dùng, hoặc Trạng thái..."
+                   value="@ViewBag.TuKhoa" />
+        </div>
+        <button type="submit" class="btn btn-primary d-flex align-items-center">
+            <span class="material-icons me-2">search</span>
+            Tìm kiếm
+        </button>
+        @if (!string.IsNullOrWhiteSpace(ViewBag.TuKhoa))
+        {
+            <a asp-action="Index" class="btn btn-secondary d-flex align-items-center">
+                <span class="material-icons me-2">clear</span>
+                Xóa lọc
+            </a>
+        }
+    </form>
+</div>
+
+<!-- Thông báo lỗi nếu có -->
+@if (!string.IsNullOrWhiteSpace(ViewBag.LuoiTimKiem))
+{
+    <div class="alert alert-danger alert-dismissible fade show m-4" role="alert">
+        <span class="material-icons align-middle me-2">error</span>
+        <strong>Lỗi:</strong> @ViewBag.LuoiTimKiem
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Bảng dữ liệu -->
 <div class="flex-grow-1 overflow-auto p-4">
     <div class="bg-white rounded shadow-sm overflow-hidden">
+        @if (ViewBag.qldonve != null && ViewBag.qldonve.Count > 0)
+        {
+            <!-- Thông báo kết quả tìm kiếm -->
+            @if (!string.IsNullOrWhiteSpace(ViewBag.TuKhoa))
+            {
+                <div class="alert alert-info m-3">
+                    <span class="material-icons align-middle me-2">info</span>
+                    Tìm thấy <strong>@ViewBag.qldonve.Count</strong> kết quả cho từ khóa "<strong>@ViewBag.TuKhoa</strong>"
+                </div>
+            }
 
-        <table class="table table-bordered align-middle text-nowrap">
-            <thead class="table-light">
-                <tr>
-                    <th><label asp-for="MaDon" class="text-muted small text-uppercase fw-semibold"></label></th>
-                    <th><label asp-for="MaNd" class="text-muted small text-uppercase fw-semibold"></label></th>
-                    <th><label asp-for="ThoiGianDat" class="text-muted small text-uppercase fw-semibold"></label></th>
-                    <th><label asp-for="TrangThai" class="text-muted small text-uppercase fw-semibold"></label></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in ViewBag.qldonve)
-                {
+            <table class="table table-bordered align-middle text-nowrap">
+                <thead class="table-light">
                     <tr>
-                        <td class="fw-semibold">@item.MaDon</td>
-                        <td class="fw-semibold">@item.MaNd</td>
-                        <td>@item.ThoiGianDat</td>
-                        <td>@item.TrangThai</td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <a asp-action="sua" asp-route-id="@item.MaDon" class="btn btn-success btn-sm">
-                                    Sửa
-                                </a>
-                                <a asp-action="xoa" asp-route-id="@item.MaDon" class="btn btn-danger btn-sm">
-                                    Xóa
-                                </a>
-                            </div>
-                        </td>
+                        <th><label asp-for="MaDon" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th><label asp-for="MaNd" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th><label asp-for="ThoiGianDat" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th><label asp-for="TrangThai" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th class="text-center">Hành động</th>
                     </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in ViewBag.qldonve)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.MaDon</td>
+                            <td class="fw-semibold">@item.MaNd</td>
+                            <td>@item.ThoiGianDat</td>
+                            <td>@item.TrangThai</td>
+                            <td class="text-center">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <a asp-action="sua" asp-route-id="@item.MaDon" class="btn btn-success btn-sm">
+                                        Sửa
+                                    </a>
+                                    <a asp-action="xoa" asp-route-id="@item.MaDon" class="btn btn-danger btn-sm">
+                                        Xóa
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-warning m-3" role="alert">
+                <span class="material-icons align-middle me-2">warning</span>
+                @if (!string.IsNullOrWhiteSpace(ViewBag.TuKhoa))
+                {
+                    <span>Không tìm thấy kết quả nào với từ khóa "<strong>@ViewBag.TuKhoa</strong>"</span>
                 }
-            </tbody>
-        </table>
+                else
+                {
+                    <span>Chưa có dữ liệu đơn vé</span>
+                }
+            </div>
+        }
     </div>
 </div>
 

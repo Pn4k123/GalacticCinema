@@ -4,6 +4,7 @@ using BookingMovieTicket.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Claims;
 
@@ -21,6 +22,31 @@ namespace BookingMovieTicket.Controllers
         [Authorize]
         public IActionResult Index()
         {
+            ViewBag.topPhims = db.ChiTietDonDatVes
+                .GroupBy(ct => ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation)
+                .Select(g => new
+                {
+                    TenPhim = g.Key.TenPhim,
+                    DoanhThu = g.Sum(x => x.GiaVe),
+
+                    Hinh = g.Key.Poster
+                })
+                .OrderByDescending(x => x.DoanhThu)
+                .Take(5)
+                .ToList();
+            
+            ViewBag.donHangMoi = db.DonDatVes
+                                .Include(d => d.ChiTietDonDatVes)
+                                .OrderByDescending(d => d.ThoiGianDat).Select(d => new
+                                {
+                                    MaDon = d.MaDon,
+                                    TenND = d.MaNdNavigation.HoTen,
+                                    ThoiGianDat = d.ThoiGianDat,
+                                    tongTien = d.ChiTietDonDatVes != null ? d.ChiTietDonDatVes.Sum(ct => ct.GiaVe) : 0,
+                                    TrangThai = d.TrangThai
+                                })
+                                .Take(5)
+                                .ToList();
             return View();
         }
 

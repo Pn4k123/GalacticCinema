@@ -53,7 +53,7 @@ namespace BookingMovieTicket.Controllers
                 }
                 catch (Exception ex)
                 {
-
+                    
                 }
             }
             return PartialView("_DangKy",model);

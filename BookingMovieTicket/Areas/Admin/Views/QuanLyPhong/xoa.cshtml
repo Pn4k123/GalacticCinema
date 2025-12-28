@@ -1,0 +1,62 @@
+﻿@model BookingMovieTicket.Models.Phong
+
+@{
+    ViewData["Title"] = "Xóa Phòng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="bg-white border-bottom p-4">
+        <h2 class="h2 fw-bold text-danger">Xóa Phòng Chiếu</h2>
+        <h5 class="text-muted">Bạn có chắc chắn muốn xóa phòng này không?</h5>
+        <p class="text-secondary small">
+            Lưu ý: Không thể xóa phòng nếu phòng này đã được thiết lập Ghế hoặc có Suất chiếu.
+        </p>
+    </header>
+
+    <div class="container mt-4">
+        <div asp-validation-summary="All" class="alert alert-danger" role="alert"
+             style="@(ViewData.ModelState.IsValid ? "display:none" : "display:block")">
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Mã Phòng:</dt>
+                    <dd class="col-sm-9 fw-bold">@Model.MaPhong</dd>
+
+                    <dt class="col-sm-3">Tên Phòng:</dt>
+                    <dd class="col-sm-9">@Model.TenPhong</dd>
+
+                    <dt class="col-sm-3">Mã Rạp:</dt>
+                    <dd class="col-sm-9">@Model.MaRap</dd>
+
+                    <dt class="col-sm-3">Trạng Thái:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.TrangThai == "Hoạt động")
+                        {
+                            <span class="badge bg-success">@Model.TrangThai</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">@Model.TrangThai</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <form asp-action="xoa" method="post">
+            <input type="hidden" asp-for="MaPhong" />
+
+            <input type="submit" value="Xác nhận xóa" class="btn btn-danger me-2" />
+            <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
+        </form>
+    </div>
+</body>
+</html>

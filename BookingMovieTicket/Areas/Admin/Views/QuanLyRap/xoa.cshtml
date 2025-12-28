@@ -1,0 +1,115 @@
+@model BookingMovieTicket.Models.Rap
+
+@{
+    ViewData["Title"] = "Xóa Rạp";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <span class="material-icons align-middle me-2">warning</span>
+                        Xóa Rạp Phim
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    <!-- Hiển thị lỗi -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span class="material-icons align-middle me-2">error</span>
+                            <strong>Lỗi:</strong>
+                            @foreach (var state in ViewData.ModelState.Values)
+                            {
+                                foreach (var error in state.Errors)
+                                {
+                                    <div>@error.ErrorMessage</div>
+                                }
+                            }
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="alert alert-warning" role="alert">
+                        <span class="material-icons align-middle me-2">info</span>
+                        <strong>Cảnh báo:</strong> Bạn có chắc chắn muốn xóa rạp này không? Hành động này không thể hoàn tác.
+                    </div>
+
+                    <!-- Thông tin Rạp -->
+                    <table class="table table-borderless">
+                        <tr>
+                            <td style="width: 150px;"><strong>Mã rạp:</strong></td>
+                            <td>@Model.MaRap</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tên rạp:</strong></td>
+                            <td class="fw-bold text-danger">@Model.TenRap</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trạng thái:</strong></td>
+                            <td>
+                                @if (Model.TrangThai == "Đang hoạt động")
+                                {
+                                    <span class="badge bg-success">@Model.TrangThai</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@Model.TrangThai</span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Cảnh báo nếu có Phòng liên kết -->
+                    @if (Model.Phongs != null && Model.Phongs.Any())
+                    {
+                        <div class="alert alert-danger mt-3">
+                            <strong><span class="material-icons align-middle">block</span> Không thể xóa:</strong>
+                            Rạp này đang chứa <strong>@Model.Phongs.Count</strong> phòng chiếu.
+                            <ul class="mb-0 mt-2 small">
+                                @foreach (var p in Model.Phongs.Take(5))
+                                {
+                                    <li>@p.TenPhong (@p.MaPhong)</li>
+                                }
+                                @if (Model.Phongs.Count > 5)
+                                {
+                                    <li>... và @(Model.Phongs.Count - 5) phòng khác.</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <!-- Nút thao tác -->
+                    <div class="d-flex gap-3 justify-content-center mt-4">
+                        @if (Model.Phongs == null || !Model.Phongs.Any())
+                        {
+                            <form method="post" asp-action="xoa" asp-route-id="@Model.MaRap" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger d-flex align-items-center">
+                                    <span class="material-icons me-2">delete</span>
+                                    Xác nhận Xóa
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary d-flex align-items-center" disabled>
+                                <span class="material-icons me-2">delete_forever</span>
+                                Không thể xóa
+                            </button>
+                        }
+
+                        <a asp-action="Index" class="btn btn-secondary d-flex align-items-center">
+                            <span class="material-icons me-2">cancel</span>
+                            Hủy bỏ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>  

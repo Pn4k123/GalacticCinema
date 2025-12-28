@@ -1,0 +1,52 @@
+﻿@model BookingMovieTicket.Models.DonDatVe
+
+@{
+    ViewData["Title"] = "Xóa Đơn Vé";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="bg-white border-bottom p-4">
+        <h2 class="h2 fw-bold text-danger">Xóa Đơn Vé</h2>
+        <h5 class="text-muted">Bạn có chắc chắn muốn xóa đơn vé này không?</h5>
+    </header>
+
+    <div class="container mt-4">
+        <div asp-validation-summary="All" class="alert alert-danger" role="alert"
+             style="@(ViewData.ModelState.IsValid ? "display:none" : "display:block")">
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Mã Đơn:</dt>
+                    <dd class="col-sm-9 fw-bold">@Model.MaDon</dd>
+
+                    <dt class="col-sm-3">Mã Người Dùng:</dt>
+                    <dd class="col-sm-9">@Model.MaNd</dd>
+
+                    <dt class="col-sm-3">Thời Gian Đặt:</dt>
+                    <dd class="col-sm-9">@Model.ThoiGianDat</dd>
+
+                    <dt class="col-sm-3">Trạng Thái:</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-info text-dark">@Model.TrangThai</span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <form asp-action="xoa" method="post">
+            <input type="hidden" asp-for="MaDon" />
+
+            <input type="submit" value="Xác nhận xóa" class="btn btn-danger me-2" />
+            <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
+        </form>
+    </div>
+</body>
+</html>
