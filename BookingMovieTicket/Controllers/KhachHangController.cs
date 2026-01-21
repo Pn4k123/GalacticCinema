@@ -123,40 +123,40 @@ namespace BookingMovieTicket.Controllers
             ViewBag.NguoiDung = nd;
 
             var dsDonHang = db.DonDatVes
-               .Include(d => d.ChiTietDonDatVes)
-                   .ThenInclude(ct => ct.MaVeNavigation)
-                       .ThenInclude(v => v.MaGheNavigation)
-               .Include(d => d.ChiTietDonDatVes)
-                   .ThenInclude(ct => ct.MaVeNavigation)
-                       .ThenInclude(v => v.MaSuatChieuNavigation)
-                           .ThenInclude(s => s.MaPhimNavigation)
-                .Include(d => d.ChiTietDonDatVes)
-                   .ThenInclude(ct => ct.MaVeNavigation)
-                       .ThenInclude(v => v.MaSuatChieuNavigation)
-                           .ThenInclude(s => s.MaPhongNavigation)
-                               .ThenInclude(r => r.MaRapNavigation)
-               .Where(d => d.MaNd == User.FindFirstValue(ClaimTypes.NameIdentifier))
-               .OrderByDescending(d => d.ThoiGianDat)
-               .ToList();
+                            .Where(d => d.MaNd == User.FindFirstValue(ClaimTypes.NameIdentifier));
+
 
             var model =  dsDonHang
-                        .Where(d => d.ChiTietDonDatVes != null && d.ChiTietDonDatVes.Any()&&d.TrangThai=="Đã thanh toán")
+                        .Where(d => d.ChiTietDonDatVes.Any()&&d.TrangThai=="Đã thanh toán")
+                        .OrderByDescending(x =>x.ThoiGianDat)
                         .Select(don => new LichSuDatVeVM
                         {
                             MaDon = don.MaDon,
                             NgayDat = don.ThoiGianDat,
                             TrangThai = don.TrangThai,
-                            NgayChieu = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.NgayChieu,
-                            GioChieu = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.GioChieu,
+                            NgayChieu = don.ChiTietDonDatVes
+                                        .Select(ct => ct.MaVeNavigation.MaSuatChieuNavigation.NgayChieu)
+                                        .FirstOrDefault(),
+
+                            GioChieu = don.ChiTietDonDatVes
+                                        .Select(ct => ct.MaVeNavigation.MaSuatChieuNavigation.GioChieu)
+                                        .FirstOrDefault(),
+
                             TongTien = don.ChiTietDonDatVes.Sum(ct => ct.GiaVe),
 
-                            TenPhim = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.TenPhim ?? "Không xác định",
-                            Poster = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.Poster,
-                            TenRapvaPhong = don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.MaPhongNavigation.MaRapNavigation.TenRap + " - " +
-                             don.ChiTietDonDatVes.FirstOrDefault()?.MaVeNavigation.MaSuatChieuNavigation.MaPhongNavigation.TenPhong,
+                            TenPhim = don.ChiTietDonDatVes
+                                    .Select(ct => ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.TenPhim)
+                                    .FirstOrDefault(),
 
-                            Ghe = string.Join(", ", don.ChiTietDonDatVes.Select(ct => ct.MaVeNavigation.MaGheNavigation.HangGhe + ct.MaVeNavigation.MaGheNavigation.SoGhe))
-                        }).ToList();
+                            Poster = don.ChiTietDonDatVes.Select(ct => ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.Poster)
+                            .FirstOrDefault(),
+
+                            Ghe = string.Join(", ",don.ChiTietDonDatVes
+                                                        .Select(ct => ct.MaVeNavigation.MaGheNavigation.HangGhe
+                                                                    + ct.MaVeNavigation.MaGheNavigation.SoGhe))
+                        })
+                        .Take(3)
+                        .ToList();
 
             return View(model);
         }

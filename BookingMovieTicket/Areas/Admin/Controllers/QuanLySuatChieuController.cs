@@ -69,7 +69,18 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
         public IActionResult them()
         {
             ViewBag.DSPhim = new SelectList(db.Phims.ToList(), "MaPhim", "TenPhim");
-            ViewBag.DSPhong = new SelectList(db.Phongs.ToList(), "MaPhong", "TenPhong");
+            ViewBag.DSPhong = new SelectList( db.Phongs
+                                                .Include(p => p.MaRapNavigation)
+                                                .Select(p => new
+                                                {
+                                                    p.MaPhong,
+                                                    TenHienThi = p.TenPhong + " - " + p.MaRapNavigation.TenRap
+                                                })
+                                                .ToList(),
+                                            "MaPhong",
+                                            "TenHienThi"
+                                        );
+
             return View();
         }
 
@@ -91,10 +102,14 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
             }
             else
             {
-                // Check độ dài: Database chỉ cho phép tối đa 10 ký tự
                 if (suatChieu.MaSuatChieu.Length > 10)
                 {
                     ModelState.AddModelError(nameof(suatChieu.MaSuatChieu), "Mã suất chiếu không được quá 10 ký tự.");
+                }
+                else if (suatChieu.NgayChieu < DateOnly.FromDateTime(DateTime.Now))
+                {
+                    ModelState.AddModelError(nameof(suatChieu.NgayChieu),
+                        "Ngày chiếu không được nhỏ hơn ngày hiện tại.");
                 }
                 else if (db.SuatChieus.Any(s => s.MaSuatChieu == suatChieu.MaSuatChieu))
                 {
@@ -261,6 +276,11 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
             if (suatChieu.GioChieu == default)
                 ModelState.AddModelError(nameof(suatChieu.GioChieu), "Vui lòng chọn giờ chiếu.");
 
+            if (suatChieu.NgayChieu < DateOnly.FromDateTime(DateTime.Now))
+            {
+                ModelState.AddModelError(nameof(suatChieu.NgayChieu),
+                    "Ngày chiếu không được nhỏ hơn ngày hiện tại.");
+            }
             // 3. Logic nghiệp vụ: Kiểm tra trùng lịch chiếu
             // (Quan trọng: Phải loại trừ chính suất chiếu đang sửa ra, dùng && s.MaSuatChieu != suatChieu.MaSuatChieu)
             if (ModelState.IsValid)
