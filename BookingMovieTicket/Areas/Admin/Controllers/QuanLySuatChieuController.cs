@@ -155,7 +155,6 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                // HIỆN CHI TIẾT LỖI RA MÀN HÌNH ĐỂ BẠN ĐỌC
                 var fullError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 ModelState.AddModelError("", "Lỗi lưu Database: " + fullError);
 
