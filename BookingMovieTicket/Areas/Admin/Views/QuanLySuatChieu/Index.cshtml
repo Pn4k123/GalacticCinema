@@ -1,0 +1,119 @@
+﻿@using BookingMovieTicket.Models
+@model BookingMovieTicket.Models.SuatChieu
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<header class="bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="h2 fw-bold text-dark">Danh sách Suất Chiếu</h2>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="them" class="btn btn-primary d-flex align-items-center">
+            <span class="material-icons me-2">add</span>
+            Thêm Suất Chiếu Mới
+        </a>
+    </div>
+</header>
+
+<!-- Thanh tìm kiếm -->
+<div class="bg-white border-bottom p-4">
+    <form method="get" asp-action="Index" class="d-flex gap-2">
+        <div class="flex-grow-1">
+            <input type="text"
+                   name="tuKhoa"
+                   class="form-control"
+                   placeholder="Tìm theo Mã suất, Mã phòng, Tên phòng, Mã phim, Tên phim, Ngày hoặc Giờ..."
+                   value="@ViewBag.TuKhoa" />
+        </div>
+        <button type="submit" class="btn btn-primary d-flex align-items-center">
+            <span class="material-icons me-2">search</span>
+            Tìm kiếm
+        </button>
+        @if (!string.IsNullOrWhiteSpace(ViewBag.TuKhoa))
+        {
+            <a asp-action="Index" class="btn btn-secondary d-flex align-items-center">
+                <span class="material-icons me-2">clear</span>
+                Xóa lọc
+            </a>
+        }
+    </form>
+</div>
+
+<!-- Thông báo lỗi nếu có -->
+@if (!string.IsNullOrWhiteSpace(ViewBag.LoiTimKiem))
+{
+    <div class="alert alert-danger alert-dismissible fade show m-4" role="alert">
+        <span class="material-icons align-middle me-2">error</span>
+        <strong>Lỗi:</strong> @ViewBag.LoiTimKiem
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="flex-grow-1 overflow-auto p-4">
+    <div class="bg-white rounded shadow-sm overflow-hidden">
+        @if (ViewBag.qlsuatchieu != null && ViewBag.qlsuatchieu.Count > 0)
+        {
+            @if (!string.IsNullOrWhiteSpace(ViewBag.TuKhoa))
+            {
+                <div class="alert alert-info m-3">
+                    <span class="material-icons align-middle me-2">info</span>
+                    Tìm thấy <strong>@ViewBag.qlsuatchieu.Count</strong> kết quả cho từ khóa "<strong>@ViewBag.TuKhoa</strong>"
+                </div>
+            }
+
+            <table class="table table-bordered align-middle text-nowrap">
+                <thead class="table-light">
+                    <tr>
+                        <th><label asp-for="MaSuatChieu" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th><label asp-for="MaPhong" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th><label asp-for="MaPhim" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th><label asp-for="NgayChieu" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th><label asp-for="GioChieu" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th><label asp-for="TrangThai" class="text-muted small text-uppercase fw-semibold"></label></th>
+                        <th class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in ViewBag.qlsuatchieu)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.MaSuatChieu</td>
+                            <td class="fw-semibold">@item.MaPhong</td>
+                            <td class="fw-semibold">@item.MaPhim</td>
+                            <td>@item.NgayChieu.ToString("yyyy-MM-dd")</td>
+                            <td>@item.GioChieu.ToString()</td>
+                            <td>@item.TrangThai</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-action="sua" asp-route-id="@item.MaSuatChieu" class="btn btn-success btn-sm">
+                                        Sửa
+                                    </a>
+                                    <a asp-action="xoa" asp-route-id="@item.MaSuatChieu" class="btn btn-danger btn-sm">
+                                        Xóa
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-warning m-3" role="alert">
+                <span class="material-icons align-middle me-2">warning</span>
+                @if (!string.IsNullOrWhiteSpace(ViewBag.TuKhoa))
+                {
+                    <span>Không tìm thấy kết quả nào với từ khóa "<strong>@ViewBag.TuKhoa</strong>"</span>
+                }
+                else
+                {
+                    <span>Chưa có dữ liệu suất chiếu</span>
+                }
+            </div>
+        }
+    </div>
+</div>

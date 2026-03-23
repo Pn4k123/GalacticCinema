@@ -1,0 +1,186 @@
+﻿@model List<BookingMovieTicket.ViewModels.LichSuDatVeVM>
+
+@{
+    ViewData["Title"] = "Lịch Sử Giao Dịch";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* --- CSS SIDEBAR (Giống trang Profile) --- */
+    .profile-sidebar {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background-color: #fff;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+    }
+
+    .avatar-img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+    }
+
+    .profile-menu .list-group-item {
+        border: none;
+        padding: 12px 20px;
+        font-weight: 500;
+        color: #555;
+        text-decoration: none;
+    }
+
+        .profile-menu .list-group-item:hover {
+            background-color: #e9ecef;
+            color: #000;
+        }
+
+        /* Active State (Màu cam) */
+        .profile-menu .list-group-item.active {
+            background-color: #fff;
+            color: #f39c12;
+            font-weight: bold;
+            border-left: 4px solid #f39c12;
+        }
+
+    /* --- CSS NỘI DUNG --- */
+    .profile-content {
+        background-color: #fff;
+        padding: 0 20px;
+        min-height: 400px;
+    }
+
+    .section-title {
+        font-weight: bold;
+        text-transform: uppercase;
+        border-bottom: 2px solid #f39c12;
+        display: inline-block;
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+    }
+
+    /* Table Lịch sử */
+    .history-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        color: #555;
+    }
+
+    .history-img {
+        width: 50px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="profile-sidebar shadow-sm border">
+                <div class="profile-header">
+                    <img src="~/hinhanh/avatar/avatar.jpg" alt="Avatar" class="avatar-img shadow-sm">
+                    <h5 class="fw-bold mb-1">@ViewBag.NguoiDung.HoTen</h5>
+                    <div class="text-warning small mb-2"><i class="bi bi-star-fill"></i> 0 Stars</div>
+                </div>
+
+                <div class="list-group profile-menu list-group-flush py-2">
+                    <a asp-action="khachHangProfile" asp-controller="KhachHang" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person-circle me-2"></i> Thông tin tài khoản
+                    </a>
+                    <a asp-action="lichSuGiaoDich" asp-controller="KhachHang" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-clock-history me-2"></i> Lịch sử giao dịch
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="bi bi-envelope-paper me-2"></i> Góp ý cho rạp
+                    </a>
+                    <a asp-action="DangXuat" asp-controller="KhachHang" class="list-group-item list-group-item-action text-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="profile-content">
+                <h4 class="mb-4 border-bottom pb-2">
+                    <span class="section-title mb-0 border-0 text-decoration-underline" style="text-decoration-color: #f39c12 !important; text-underline-offset: 8px;">LỊCH SỬ GIAO DỊCH</span>
+                </h4>
+                @if (Model == null || !Model.Any())
+                {
+                    <div class="alert alert-info text-center">
+                        Bạn chưa có giao dịch nào. <a asp-controller="Home" asp-action="Index">Đặt vé ngay!</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle history-table">
+                            <thead>
+                                <tr>
+                                    <th>Phim</th>
+                                    <th>Thông Tin Vé</th>
+                                    <th>Ngày Đặt</th>
+                                    <th>Tổng Tiền</th>
+                                    <th>Trạng Thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@item.Poster" class="history-img me-3" alt="Poster">
+                                                <div>
+                                                    <div class="fw-bold">@item.TenPhim</div>
+                                                    <small class="text-muted">2D Phụ Đề</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div><span class="fw-bold">@item.TenRapvaPhong</span></div>
+                                            <div class="small">Ghế: <span class="fw-bold text-primary">@item.Ghe</span></div>
+                                            <div class="small text-muted">@item.GioChieu - @item.NgayChieu.Value.ToString("dd/MM/yyyy")</div>
+                                        </td>
+                                        <td>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="fw-bold text-danger">@item.TongTien.ToString("#,##0") VNĐ</td>
+                                        <td>
+                                        @{
+                                                var statusClass = "bg-secondary";
+                                                if (item.TrangThai == "Đã thanh toán") statusClass = "bg-success";
+                                            
+                                        }
+                                            <span class="badge @statusClass">@item.TrangThai</span>
+                                        </td>
+                                    </tr>
+
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
+                            <li class="page-item active"><a class="page-link bg-warning border-warning" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link text-dark" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link text-dark" href="#">Sau</a></li>
+                        </ul>
+                    </nav>
+                }
+                
+
+            </div>
+        </div>
+    </div>
+</div>
+

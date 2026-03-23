@@ -1,0 +1,121 @@
+@model BookingMovieTicket.Models.Phim
+
+@{
+    ViewData["Title"] = "Sửa Phim";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<header class="bg-white border-bottom p-4">
+    <h2 class="h2 fw-bold text-dark">Cập nhật thông tin Phim</h2>
+</header>
+
+<div class="container p-4">
+    <div class="bg-white rounded shadow-sm p-4">
+        <!-- enctype="multipart/form-data" là bắt buộc để upload file -->
+        <form asp-action="sua" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            <input type="hidden" asp-for="MaPhim" />
+            <!-- Giữ lại đường dẫn Poster cũ để hiển thị nếu validation lỗi -->
+            <input type="hidden" asp-for="Poster" />
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="MaPhim" class="form-label fw-bold"></label>
+                    <input asp-for="MaPhim" class="form-control" readonly style="background-color: #e9ecef;" />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="TenPhim" class="form-label fw-bold"></label>
+                    <input asp-for="TenPhim" class="form-control" placeholder="Nhập tên phim" />
+                    <span asp-validation-for="TenPhim" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="DaoDien" class="form-label fw-bold"></label>
+                    <input asp-for="DaoDien" class="form-control" />
+                    <span asp-validation-for="DaoDien" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ThoiLuong" class="form-label fw-bold"></label>
+                    <div class="input-group">
+                        <input asp-for="ThoiLuong" class="form-control" type="number" min="1" />
+                        <span class="input-group-text">phút</span>
+                    </div>
+                    <span asp-validation-for="ThoiLuong" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="NgayPhatHanh" class="form-label fw-bold"></label>
+                    <input asp-for="NgayPhatHanh" class="form-control" type="date" />
+                    <span asp-validation-for="NgayPhatHanh" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DanhGia" class="form-label fw-bold"></label>
+                    <input asp-for="DanhGia" class="form-control" placeholder="VD: 8.5/10" />
+                    <span asp-validation-for="DanhGia" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Thể loại phim</label>
+                <!-- Dropdown chọn nhiều (multiple) -->
+                <select name="MaTheLoais" class="form-select" asp-items="ViewBag.DSTheLoai" multiple style="height: 120px;">
+                </select>
+                <small class="text-muted">Giữ phím Ctrl (Windows) hoặc Command (Mac) để chọn nhiều thể loại.</small>
+                @* Hiển thị lỗi cho MaTheLoais nếu có *@
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState["MaTheLoais"] != null && ViewData.ModelState["MaTheLoais"].Errors.Count > 0)
+                {
+                    <div class="text-danger">@ViewData.ModelState["MaTheLoais"].Errors[0].ErrorMessage</div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="MoTa" class="form-label fw-bold"></label>
+                <textarea asp-for="MoTa" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="MoTa" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Trailer" class="form-label fw-bold"></label>
+                <input asp-for="Trailer" class="form-control" placeholder="Link Youtube Embed..." />
+                <span asp-validation-for="Trailer" class="text-danger"></span>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Poster hiện tại</label>
+                    <div class="mb-2">
+                        @if (!string.IsNullOrEmpty(Model.Poster))
+                        {
+                            <img src="@Model.Poster" class="img-thumbnail" style="height: 200px; width: auto;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa có poster</span>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ImageFile" class="form-label fw-bold">Thay đổi Poster (Tùy chọn)</label>
+                    <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                    <small class="text-muted">Để trống nếu muốn giữ nguyên poster cũ.</small>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-success">
+                    <span class="material-icons align-middle fs-5">save</span> Lưu thay đổi
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <span class="material-icons align-middle fs-5">arrow_back</span> Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

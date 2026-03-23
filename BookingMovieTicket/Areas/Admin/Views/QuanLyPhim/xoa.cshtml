@@ -1,0 +1,114 @@
+@model BookingMovieTicket.Models.Phim
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+
+@{
+    ViewData["Title"] = "Xóa Phim";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+    var modelState = ViewData.ModelState;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <span class="material-icons align-middle me-2">warning</span>
+                        Xóa Phim
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    <!-- Hiển thị lỗi nếu có -->
+                    @if (!modelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span class="material-icons align-middle me-2">error</span>
+                            <strong>Lỗi:</strong>
+                            @foreach (var state in modelState.Values)
+                            {
+                                @foreach (var error in state.Errors)
+                                {
+                                    <div>@error.ErrorMessage</div>
+                                }
+                            }
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="alert alert-warning" role="alert">
+                        <span class="material-icons align-middle me-2">info</span>
+                        <strong>Xác nhận:</strong> Bạn có chắc chắn muốn xóa phim này không? Hành động này không thể hoàn tác.
+                    </div>
+
+                    <!-- Thông tin phim -->
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-center">
+                            @if (!string.IsNullOrEmpty(Model.Poster))
+                            {
+                                <img src="@Model.Poster" alt="@Model.TenPhim" class="img-thumbnail" style="height: 200px; width: auto;">
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Mã phim:</strong></td>
+                                    <td>@Model.MaPhim</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tên phim:</strong></td>
+                                    <td class="fw-bold text-danger">@Model.TenPhim</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Thời lượng:</strong></td>
+                                    <td>@Model.ThoiLuong phút</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Đạo diễn:</strong></td>
+                                    <td>@Model.DaoDien</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Đánh giá:</strong></td>
+                                    <td>@Model.DanhGia</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ngày phát hành:</strong></td>
+                                    <td>@Model.NgayPhatHanh?.ToShortDateString()</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Thể loại:</strong></td>
+                                    <td>
+                                        @if (Model.MaTheLoais != null && Model.MaTheLoais.Any())
+                                        {
+                                            @string.Join(", ", Model.MaTheLoais.Select(tl => tl.TenTheLoai))
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Không có</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Nút xóa/hủy -->
+                    <div class="d-flex gap-3 justify-content-center mt-4">
+                        <form method="post" asp-action="xoa" asp-route-id="@Model.MaPhim" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger d-flex align-items-center">
+                                <span class="material-icons me-2">delete</span>
+                                Xóa Phim
+                            </button>
+                        </form>
+
+                        <a asp-action="Index" class="btn btn-secondary d-flex align-items-center">
+                            <span class="material-icons me-2">cancel</span>
+                            Hủy
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

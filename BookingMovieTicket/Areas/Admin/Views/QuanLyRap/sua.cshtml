@@ -1,0 +1,61 @@
+@model BookingMovieTicket.Models.Rap
+
+@{
+    ViewData["Title"] = "Sửa Rạp";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<header class="bg-white border-bottom p-4">
+    <h2 class="h2 fw-bold text-dark">Cập nhật thông tin Rạp</h2>
+</header>
+
+<div class="container p-4">
+    <div class="bg-white rounded shadow-sm p-4">
+        <form asp-action="sua" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            <!-- Input hidden để giữ giá trị MaRap khi submit -->
+            <input type="hidden" asp-for="MaRap" />
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="MaRap" class="form-label fw-bold"></label>
+                    <!-- Readonly vì không được sửa khóa chính -->
+                    <input asp-for="MaRap" class="form-control" readonly style="background-color: #e9ecef;" />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="TenRap" class="form-label fw-bold"></label>
+                    <input asp-for="TenRap" class="form-control" placeholder="Nhập tên rạp" />
+                    <span asp-validation-for="TenRap" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DiaChi" class="form-label fw-bold"></label>
+                <input asp-for="DiaChi" class="form-control" placeholder="Nhập địa chỉ chi tiết" />
+                <span asp-validation-for="DiaChi" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TrangThai" class="form-label fw-bold"></label>
+                <select asp-for="TrangThai" class="form-select">
+                    <option value="">-- Chọn trạng thái --</option>
+                    <!-- Value phải khớp chính xác với Database Constraint -->
+                    <option value="Còn hoạt động">Còn hoạt động</option>
+                    <option value="Bảo trì">Bảo trì</option>
+                </select>
+                <span asp-validation-for="TrangThai" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-success">
+                    <span class="material-icons align-middle fs-5">save</span> Lưu thay đổi
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <span class="material-icons align-middle fs-5">arrow_back</span> Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

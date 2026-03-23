@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Lỗi Thanh Toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 text-center">
+    <div class="alert alert-danger p-5 shadow-sm rounded">
+        <h1 class="display-4"><i class="bi bi-x-circle-fill"></i> Rất tiếc!</h1>
+        <p class="lead mt-3">@ViewBag.Message</p>
+        <hr>
+        <p>Vui lòng thực hiện đặt vé lại từ đầu.</p>
+        <a href="/" class="btn btn-primary mt-3">Về Trang Chủ</a>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+﻿@model BookingMovieTicket.Models.Ghe
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<header class="bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="h2 fw-bold text-dark">Danh sách Ghế</h2>
+    </div>
+    @* <div class="d-flex align-items-center gap-3">
+        <a asp-action="them" class="btn btn-primary d-flex align-items-center">
+            <span class="material-icons me-2">add</span>
+            Thêm Ghế Mới
+        </a>
+    </div> *@
+</header>
+<div class="flex-grow-1 overflow-auto p-4">
+    <div class="bg-white rounded shadow-sm overflow-hidden">
+
+        <table class="table table-bordered align-middle text-nowrap">
+            <thead class="table-light">
+                <tr>
+                    <th><label asp-for="MaGhe" class="text-muted small text-uppercase fw-semibold"></label></th>
+                    <th><label asp-for="MaPhong" class="text-muted small text-uppercase fw-semibold"></label></th>
+                    <th><label asp-for="HangGhe" class="text-muted small text-uppercase fw-semibold"></label></th>
+                    <th><label asp-for="SoGhe" class="text-muted small text-uppercase fw-semibold"></label></th>
+                    <th><label asp-for="LoaiGhe" class="text-muted small text-uppercase fw-semibold"></label></th>
+                    <th><label asp-for="Gia" class="text-muted small text-uppercase fw-semibold"></label></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ViewBag.qlghe)
+                {
+                    <tr>
+                        <td class="fw-semibold">@item.MaGhe</td>
+                        <td class="fw-semibold">@item.MaPhong</td>
+                        <td>@item.HangGhe</td>
+                        <td>@item.SoGhe</td>
+                        <td>@item.LoaiGhe</td>
+                        <td>@item.Gia</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a asp-action="sua" asp-route-id="@item.MaGhe" class="btn btn-success btn-sm">
+                                    Sửa
+                                </a>
+                                <a asp-action="xoa" asp-route-id="@item.MaGhe" class="btn btn-danger btn-sm">
+                                    Xóa
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    

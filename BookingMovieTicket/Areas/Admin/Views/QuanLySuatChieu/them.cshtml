@@ -1,0 +1,79 @@
+﻿@using BookingMovieTicket.Models
+@model BookingMovieTicket.Models.SuatChieu
+@{
+    ViewData["Title"] = "them";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+}
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <header class="bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="h2 fw-bold text-dark">Thêm suất chiếu mới</h2>
+        </div>
+    </header>
+    <br />
+    <div class="container">
+        <form asp-action="them" method="post" enctype="multipart/form-data" asp-area="Admin">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col">
+                    <label asp-for="MaSuatChieu" class="form-label"></label>
+                    <input asp-for="MaSuatChieu" class="form-control" />
+                    <span asp-validation-for="MaSuatChieu" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MaPhong" class="control-label"></label>
+                    <select asp-for="MaPhong" asp-items="ViewBag.DSPhong" class="form-select">
+                        <option value="">-- Chọn phòng --</option>
+                    </select>
+                    <span asp-validation-for="MaPhong" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MaPhim" class="control-label"></label>
+                    <select asp-for="MaPhim" asp-items="ViewBag.DSPhim" class="form-select">
+                        <option value="">-- Chọn phim --</option>
+                    </select>
+                    <span asp-validation-for="MaPhim" class="text-danger"></span>
+                </div>
+
+                <!-- ADDED: Date and Time inputs -->
+                <div class="form-group">
+                    <label asp-for="NgayChieu" class="control-label"></label>
+                    <input asp-for="NgayChieu" type="date" class="form-control" />
+                    <span asp-validation-for="NgayChieu" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GioChieu" class="control-label"></label>
+                    <input asp-for="GioChieu" type="time" class="form-control" />
+                    <span asp-validation-for="GioChieu" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="TrangThai" class="control-label">Trạng thái</label>
+                    <select asp-for="TrangThai" class="form-select">
+                        <option value="">-- Chọn trạng thái --</option>
+
+                        <option value="Sắp chiếu">Sắp chiếu</option>
+                    </select>
+                    <span asp-validation-for="TrangThai" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group mt-3">
+                <input type="submit" class="btn btn-primary" value="Save" />
+            </div>
+            <div><a asp-action="Index">Quay lại</a></div>
+        </form>
+    </div>
+</body>
+</html>
+
+

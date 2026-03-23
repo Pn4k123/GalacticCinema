@@ -1,0 +1,274 @@
+﻿@using Microsoft.EntityFrameworkCore
+@model BookingMovieTicket.Models.Phim
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
+    ViewData["Title"] = "Dashboard";
+}
+@{
+    QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
+    int tongPhim = db.Phims.Count();
+    decimal tongDoanhThu = db.ChiTietDonDatVes.Sum(ct => ct.GiaVe);
+    int tongKH = db.NguoiDungs.Where(k => k.MaNd.StartsWith("KH")).Count();
+    int tongVeBan = db.DonDatVes.Where(d => d.TrangThai == "Đã thanh toán").Count();
+
+    // Lấy dữ liệu Top Phim 
+    var topPhims = db.ChiTietDonDatVes
+       .GroupBy(ct => ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation)
+       .Select(g => new
+       {
+           TenPhim = g.Key.TenPhim,
+           DoanhThu = g.Sum(x => x.GiaVe),
+           Hinh = g.Key.Poster
+       })
+       .OrderByDescending(x => x.DoanhThu)
+       .Take(5)
+       .ToList();
+
+    // Lấy dữ liệu Đơn hàng mới 
+    var donHangMoi = db.DonDatVes
+        .Include(d => d.ChiTietDonDatVes)
+        .Include(x => x.MaNdNavigation)
+        .OrderByDescending(d => d.ThoiGianDat)
+        .Take(5)
+        .ToList();
+}
+
+<style>
+    /* Card chung */
+    .card-modern {
+        border: none;
+        border-radius: 16px;
+        background-color: #fff;
+        box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 30px; /* Khoảng cách dưới */
+    }
+
+        .card-modern:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px 0 rgba(0, 0, 0, 0.1);
+        }
+
+    /* Icon Styles */
+    .icon-shape {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #fff;
+        box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #1572e8, #48abf7);
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #31ce36, #74eb78);
+    }
+
+    .bg-gradient-warning {
+        background: linear-gradient(45deg, #ffad46, #ffcf87);
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(45deg, #6861ce, #938ce8);
+    }
+
+    .card-category {
+        font-size: 14px;
+        font-weight: 600;
+        color: #8d9498;
+        text-transform: uppercase;
+    }
+
+    .card-number {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1a2035;
+        margin-bottom: 0;
+    }
+
+    .card-overlay-icon {
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 100px;
+        opacity: 0.05;
+        transform: rotate(-15deg);
+        pointer-events: none;
+    }
+
+    /* Table Styles */
+    .table-custom th {
+        font-weight: 600;
+        color: #8d9498;
+        border-top: none !important;
+    }
+
+    .table-custom td {
+        vertical-align: middle;
+        padding: 15px 10px;
+    }
+</style>
+
+<div class="page-inner">
+    <div class="row mt-4">
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="card-category">Doanh Thu</p>
+                            <h4 class="card-number text-success">@tongDoanhThu.ToString("N0") <small>đ</small></h4>
+                        </div>
+                        <div class="icon-shape bg-gradient-success"><i class="fas fa-dollar-sign"></i></div>
+                    </div>
+                    <i class="fas fa-dollar-sign card-overlay-icon text-success"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="card-category">Vé Đã Bán</p>
+                            <h4 class="card-number">@tongVeBan</h4>
+                        </div>
+                        <div class="icon-shape bg-gradient-warning"><i class="fas fa-ticket-alt"></i></div>
+                    </div>
+                    <i class="fas fa-ticket-alt card-overlay-icon text-warning"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="card-category">Khách Hàng</p>
+                            <h4 class="card-number">@tongKH</h4>
+                        </div>
+                        <div class="icon-shape bg-gradient-primary"><i class="fas fa-users"></i></div>
+                    </div>
+                    <i class="fas fa-users card-overlay-icon text-primary"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="card-category">Phim Chiếu</p>
+                            <h4 class="card-number">@tongPhim</h4>
+                        </div>
+                        <div class="icon-shape bg-gradient-info"><i class="fas fa-film"></i></div>
+                    </div>
+                    <i class="fas fa-film card-overlay-icon text-info"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-8">
+            <div class="card card-modern" style="min-height: 500px;">
+                <div class="card-header bg-white border-0 mt-2">
+                    <div class="card-title fw-bold">Đơn đặt vé mới nhất</div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Thời gian</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in donHangMoi)
+                                {
+                                    decimal tongTienItem = item.ChiTietDonDatVes != null ? item.ChiTietDonDatVes.Sum(ct => ct.GiaVe) : 0;
+                                    string badgeClass = "bg-secondary";
+                                    string trangThaiText = string.IsNullOrEmpty(item.TrangThai) ? "Chưa xác định" : item.TrangThai;
+
+                                    if (item.TrangThai == "Đã thanh toán") { badgeClass = "bg-success"; }
+                                    else if (item.TrangThai == "Đang chờ") { badgeClass = "bg-warning text-dark"; }
+                                    else if (item.TrangThai == "Đã hủy") { badgeClass = "bg-danger"; }
+
+                                    <tr>
+                                        <td><span class="fw-bold">@item.MaDon</span></td>
+                                        <td>@item.MaNdNavigation.HoTen</td>
+                                        <td>@item.ThoiGianDat.ToString("dd/MM HH:mm")</td>
+                                        <td class="fw-bold text-primary">@tongTienItem.ToString("N0") đ</td>
+                                        <td>
+                                            <span class="badge @badgeClass" style="font-size: 0.85rem; padding: 6px 10px;">
+                                                @trangThaiText
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-modern" style="min-height: 500px;">
+                <div class="card-header bg-white border-0 mt-2">
+                    <div class="card-title fw-bold">Top Phim Doanh Thu</div>
+                </div>
+                <div class="card-body">
+                    @foreach (var phim in topPhims)
+                    {
+                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                            <div class="me-3 position-relative">
+                                <img src="@phim.Hinh"
+                                     alt="@phim.TenPhim"
+                                     class="rounded shadow-sm"
+                                     style="width: 70px; height: 105px; object-fit: cover;" />
+
+                                @if (topPhims.IndexOf(phim) == 0)
+                                {
+                                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">#1</span>
+                                }
+                                else if (topPhims.IndexOf(phim) == 1)
+                                {
+
+                                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-warning text-dark">#2</span>
+                                }
+                                else if (topPhims.IndexOf(phim) == 2)
+                                {
+
+                                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-info">#3</span>
+                                }
+                            </div>
+                            <div class="flex-1 ms-2">
+                                <h6 class="fw-bold mb-1 text-truncate" style="max-width: 200px;">@phim.TenPhim</h6>
+                                <p class="mb-0 text-muted small">Doanh thu</p>
+                                <span class="text-success fw-bold fs-5">@phim.DoanhThu.ToString("N0") đ</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
