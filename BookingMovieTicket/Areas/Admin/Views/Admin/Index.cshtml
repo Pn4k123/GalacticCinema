@@ -1,36 +1,7 @@
-﻿@using Microsoft.EntityFrameworkCore
-@model BookingMovieTicket.Models.Phim
+@model BookingMovieTicket.ViewModels.AdminDashboardVM
 @{
     Layout = "~/Areas/Admin/Views/Shared/_Layout_Admin.cshtml";
     ViewData["Title"] = "Dashboard";
-}
-@{
-    QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
-    int tongPhim = db.Phims.Count();
-    decimal tongDoanhThu = db.ChiTietDonDatVes.Sum(ct => ct.GiaVe);
-    int tongKH = db.NguoiDungs.Where(k => k.MaNd.StartsWith("KH")).Count();
-    int tongVeBan = db.DonDatVes.Where(d => d.TrangThai == "Đã thanh toán").Count();
-
-    // Lấy dữ liệu Top Phim 
-    var topPhims = db.ChiTietDonDatVes
-       .GroupBy(ct => ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation)
-       .Select(g => new
-       {
-           TenPhim = g.Key.TenPhim,
-           DoanhThu = g.Sum(x => x.GiaVe),
-           Hinh = g.Key.Poster
-       })
-       .OrderByDescending(x => x.DoanhThu)
-       .Take(5)
-       .ToList();
-
-    // Lấy dữ liệu Đơn hàng mới 
-    var donHangMoi = db.DonDatVes
-        .Include(d => d.ChiTietDonDatVes)
-        .Include(x => x.MaNdNavigation)
-        .OrderByDescending(d => d.ThoiGianDat)
-        .Take(5)
-        .ToList();
 }
 
 <style>
@@ -125,7 +96,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <p class="card-category">Doanh Thu</p>
-                            <h4 class="card-number text-success">@tongDoanhThu.ToString("N0") <small>đ</small></h4>
+                            <h4 class="card-number text-success">@Model.TongDoanhThu.ToString("N0") <small>đ</small></h4>
                         </div>
                         <div class="icon-shape bg-gradient-success"><i class="fas fa-dollar-sign"></i></div>
                     </div>
@@ -140,7 +111,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <p class="card-category">Vé Đã Bán</p>
-                            <h4 class="card-number">@tongVeBan</h4>
+                            <h4 class="card-number">@Model.TongVeBan</h4>
                         </div>
                         <div class="icon-shape bg-gradient-warning"><i class="fas fa-ticket-alt"></i></div>
                     </div>
@@ -155,7 +126,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <p class="card-category">Khách Hàng</p>
-                            <h4 class="card-number">@tongKH</h4>
+                            <h4 class="card-number">@Model.TongKH</h4>
                         </div>
                         <div class="icon-shape bg-gradient-primary"><i class="fas fa-users"></i></div>
                     </div>
@@ -170,7 +141,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <p class="card-category">Phim Chiếu</p>
-                            <h4 class="card-number">@tongPhim</h4>
+                            <h4 class="card-number">@Model.TongPhim</h4>
                         </div>
                         <div class="icon-shape bg-gradient-info"><i class="fas fa-film"></i></div>
                     </div>
@@ -200,9 +171,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in donHangMoi)
+                                @foreach (var item in Model.DonHangMoi)
                                 {
-                                    decimal tongTienItem = item.ChiTietDonDatVes != null ? item.ChiTietDonDatVes.Sum(ct => ct.GiaVe) : 0;
                                     string badgeClass = "bg-secondary";
                                     string trangThaiText = string.IsNullOrEmpty(item.TrangThai) ? "Chưa xác định" : item.TrangThai;
 
@@ -212,9 +182,9 @@
 
                                     <tr>
                                         <td><span class="fw-bold">@item.MaDon</span></td>
-                                        <td>@item.MaNdNavigation.HoTen</td>
+                                        <td>@item.TenND</td>
                                         <td>@item.ThoiGianDat.ToString("dd/MM HH:mm")</td>
-                                        <td class="fw-bold text-primary">@tongTienItem.ToString("N0") đ</td>
+                                        <td class="fw-bold text-primary">@item.TongTien.ToString("N0") đ</td>
                                         <td>
                                             <span class="badge @badgeClass" style="font-size: 0.85rem; padding: 6px 10px;">
                                                 @trangThaiText
@@ -235,7 +205,7 @@
                     <div class="card-title fw-bold">Top Phim Doanh Thu</div>
                 </div>
                 <div class="card-body">
-                    @foreach (var phim in topPhims)
+                    @foreach (var phim in Model.TopPhims)
                     {
                         <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
                             <div class="me-3 position-relative">
@@ -244,16 +214,16 @@
                                      class="rounded shadow-sm"
                                      style="width: 70px; height: 105px; object-fit: cover;" />
 
-                                @if (topPhims.IndexOf(phim) == 0)
+                                @if (Model.TopPhims.IndexOf(phim) == 0)
                                 {
                                     <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">#1</span>
                                 }
-                                else if (topPhims.IndexOf(phim) == 1)
+                                else if (Model.TopPhims.IndexOf(phim) == 1)
                                 {
 
                                     <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-warning text-dark">#2</span>
                                 }
-                                else if (topPhims.IndexOf(phim) == 2)
+                                else if (Model.TopPhims.IndexOf(phim) == 2)
                                 {
 
                                     <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-info">#3</span>

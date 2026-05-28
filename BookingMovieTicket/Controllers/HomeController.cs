@@ -19,7 +19,7 @@ namespace BookingMovieTicket.Controllers
             ViewBag.tenPhim = new Phim();
             ViewBag.tenRap = new Rap();
             ViewBag.DSPhim = new SelectList(db.Phims.ToList(), "MaPhim", "TenPhim");
-            ViewBag.DSRap = new SelectList(db.Raps.ToList(), "MaRap", "TenRap");
+            ViewBag.DSRapSelectList = new SelectList(db.Raps.ToList(), "MaRap", "TenRap");
             return View();
         }
 

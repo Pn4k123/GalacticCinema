@@ -1,7 +1,7 @@
-﻿@using BookingMovieTicket.Models
+@using BookingMovieTicket.Models
 @model BookingMovieTicket.Models.Phim
+@inject QuanLyDatVePhimContext db
 @{
-    QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
     var tenPhim = Model.TenPhim;
     ViewData["Title"] = "Đặt vé phim " + tenPhim;
     Layout = "~/Views/Shared/_Layout.cshtml";

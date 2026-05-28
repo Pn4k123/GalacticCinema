@@ -1,27 +1,5 @@
-﻿@using BookingMovieTicket.ViewModels
-@using Newtonsoft.Json
+@using BookingMovieTicket.ViewModels
 
-@{
-    QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
-    ViewBag.DSRap = db.Raps;
-
-    var phimsapchieu = db.Phims.Select(phim => new PhimVM
-    {
-        MaPhim = phim.MaPhim,
-        TenPhim = phim.TenPhim,
-        Poster = phim.Poster,
-        NgayPhatHanh = phim.NgayPhatHanh
-    }).Where(p => p.NgayPhatHanh > DateTime.Now).OrderByDescending(p => p.NgayPhatHanh).Take(4);
-
-    var phimdangchieu = db.Phims.Select(phim => new PhimVM
-    {
-        MaPhim = phim.MaPhim,
-        TenPhim = phim.TenPhim,
-        Poster = phim.Poster,
-        NgayPhatHanh = phim.NgayPhatHanh
-    }).Where(p => p.NgayPhatHanh <= DateTime.Now).OrderByDescending(p => p.NgayPhatHanh).Take(4);
-
-}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,7 +42,7 @@
                             <div class="dropdown-menu mega-menu p-3" aria-labelledby="navbarDropdownPhim">
                                 <div class="dropdown-item-text fw-bold text-md">Phim đang chiếu</div>
                                 <div class="row">
-                                    @foreach (var item in phimdangchieu)
+                                    @foreach (var item in ViewBag.PhimDangChieu ?? new List<PhimVM>())
                                     {
                                         <div class="col-3">
                                             <div class="card h-100 movie-card position-relative overflow-hidden ">
@@ -83,7 +61,7 @@
                                 <hr class="dropdown-divider">
                                 <div class="dropdown-item-text fw-bold text-md">Phim sắp chiếu</div>
                                 <div class="row">
-                                    @foreach (var item in phimsapchieu)
+                                    @foreach (var item in ViewBag.PhimSapChieu ?? new List<PhimVM>())
                                     {
                                         <div class="col-3">
                                             <div class="card h-100 movie-card position-relative overflow-hidden ">
@@ -132,13 +110,16 @@
                             }
                             else
                             {
-                                NguoiDung kh = JsonConvert.DeserializeObject<NguoiDung>(session);
-                                <li>
-                                    <a asp-action="khachHangProfile" asp-controller="KhachHang" class="nav-link text-black">@kh.HoTen</a>
-                                </li>
-                                <li>
-                                    <a asp-action="DangXuat" asp-controller="KhachHang" class="nav-link text-black">Đăng Xuất</a>
-                                </li>
+                                var kh = Newtonsoft.Json.JsonConvert.DeserializeObject<BookingMovieTicket.ViewModels.UserSessionVM>(session);
+                                if (kh != null)
+                                {
+                                    <li>
+                                        <a asp-action="khachHangProfile" asp-controller="KhachHang" class="nav-link text-black">@kh.HoTen</a>
+                                    </li>
+                                    <li>
+                                        <a asp-action="DangXuat" asp-controller="KhachHang" class="nav-link text-black">Đăng Xuất</a>
+                                    </li>
+                                }
                             }
 
                         }

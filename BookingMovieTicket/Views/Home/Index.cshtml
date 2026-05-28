@@ -1,4 +1,4 @@
-﻿@using BookingMovieTicket.ViewModels
+@using BookingMovieTicket.ViewModels
 @{
     ViewData["Title"] = "Trang Chủ";
     Phim phim = ViewBag.tenPhim;
@@ -43,7 +43,7 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <select asp-for="@rap.TenRap" asp-items="ViewBag.DSRap" class="form-select" id="cinemaSelect">
+                <select asp-for="@rap.TenRap" asp-items="ViewBag.DSRapSelectList" class="form-select" id="cinemaSelect">
                     <option selected="selected">Chọn rạp</option>
                 </select>
             </div>

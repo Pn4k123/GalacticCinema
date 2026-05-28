@@ -1,4 +1,4 @@
-﻿using BookingMovieTicket.Models;
+using BookingMovieTicket.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +9,12 @@ namespace BookingMovieTicket.Controllers
 {
     public class SuatChieuController : Controller
     {
-        QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
+        private readonly QuanLyDatVePhimContext db;
+
+        public SuatChieuController(QuanLyDatVePhimContext context)
+        {
+            db = context;
+        }
 
         public IActionResult loadSuatChieu(DateOnly ngay ,string maPhim,string maRap)
         {

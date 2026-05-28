@@ -1,4 +1,4 @@
-﻿using BookingMovieTicket.Helper;
+using BookingMovieTicket.Helper;
 using BookingMovieTicket.Models;
 using BookingMovieTicket.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -23,34 +23,44 @@ namespace BookingMovieTicket.Controllers
 
         public IActionResult Index()
         {
-            ViewBag.topPhims = db.ChiTietDonDatVes
-                .GroupBy(ct => ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation)
-                .Select(g => new
-                {
-                    TenPhim = g.Key.TenPhim,
-                    DoanhThu = g.Sum(x => x.GiaVe),
-                    Hinh = g.Key.Poster
-                })
-                .OrderByDescending(x => x.DoanhThu)
-                .Take(5)
-                .ToList();
+            var model = new AdminDashboardVM
+            {
+                TongPhim = db.Phims.Count(),
+                TongDoanhThu = db.ChiTietDonDatVes.Any() ? db.ChiTietDonDatVes.Sum(ct => ct.GiaVe) : 0,
+                TongKH = db.NguoiDungs.Count(k => k.MaNd.StartsWith("KH")),
+                TongVeBan = db.DonDatVes.Count(d => d.TrangThai == "Đã thanh toán"),
+                TopPhims = db.ChiTietDonDatVes
+                    .GroupBy(ct => new { 
+                        ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.MaPhim,
+                        ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.TenPhim,
+                        ct.MaVeNavigation.MaSuatChieuNavigation.MaPhimNavigation.Poster
+                    })
+                    .Select(g => new TopPhimVM
+                    {
+                        TenPhim = g.Key.TenPhim,
+                        DoanhThu = g.Sum(x => x.GiaVe),
+                        Hinh = g.Key.Poster
+                    })
+                    .OrderByDescending(x => x.DoanhThu)
+                    .Take(5)
+                    .ToList(),
+                DonHangMoi = db.DonDatVes
+                    .Include(d => d.ChiTietDonDatVes)
+                    .Include(d => d.MaNdNavigation)
+                    .OrderByDescending(d => d.ThoiGianDat)
+                    .Take(5)
+                    .Select(d => new DonHangMoiVM
+                    {
+                        MaDon = d.MaDon,
+                        TenND = d.MaNdNavigation.HoTen,
+                        ThoiGianDat = d.ThoiGianDat,
+                        TongTien = d.ChiTietDonDatVes != null ? d.ChiTietDonDatVes.Sum(ct => ct.GiaVe) : 0,
+                        TrangThai = d.TrangThai
+                    })
+                    .ToList()
+            };
 
-            ViewBag.donHangMoi = db.DonDatVes
-                .Include(d => d.ChiTietDonDatVes)
-                .Include(d => d.MaNdNavigation)
-                .OrderByDescending(d => d.ThoiGianDat)
-                .Select(d => new
-                {
-                    MaDon = d.MaDon,
-                    TenND = d.MaNdNavigation.HoTen,
-                    ThoiGianDat = d.ThoiGianDat,
-                    tongTien = d.ChiTietDonDatVes != null ? d.ChiTietDonDatVes.Sum(ct => ct.GiaVe) : 0,
-                    TrangThai = d.TrangThai
-                })
-                .Take(5)
-                .ToList();
-
-            return View();
+            return View(model);
         }
 
         [AllowAnonymous]

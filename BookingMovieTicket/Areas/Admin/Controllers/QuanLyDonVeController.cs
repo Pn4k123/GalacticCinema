@@ -23,12 +23,10 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
 
                 if (string.IsNullOrWhiteSpace(tuKhoa))
                 {
-                    // Nếu không có từ khóa, hiển thị tất cả
                     danhSach = db.DonDatVes.ToList();
                 }
                 else
                 {
-                    // Tìm kiếm theo từ khóa (tìm trong MaDon, MaNd, TrangThai)
                     tuKhoa = tuKhoa.Trim().ToLower();
                     danhSach = db.DonDatVes
                         .Where(d => d.MaDon.ToLower().Contains(tuKhoa) ||

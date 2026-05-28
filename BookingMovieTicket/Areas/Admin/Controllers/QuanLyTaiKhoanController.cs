@@ -1,4 +1,4 @@
-﻿using BookingMovieTicket.Models;
+using BookingMovieTicket.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingMovieTicket.Areas.Admin.Controllers
@@ -6,7 +6,13 @@ namespace BookingMovieTicket.Areas.Admin.Controllers
     [Area("Admin")]
     public class QuanLyTaiKhoanController : Controller
     {
-        QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
+        private readonly QuanLyDatVePhimContext db;
+
+        public QuanLyTaiKhoanController(QuanLyDatVePhimContext context)
+        {
+            db = context;
+        }
+
         public IActionResult Index()
         {
             ViewBag.qltk = db.NguoiDungs.ToList();

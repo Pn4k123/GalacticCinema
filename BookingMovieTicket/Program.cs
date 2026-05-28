@@ -1,4 +1,4 @@
-﻿using BookingMovieTicket.Helper;
+using BookingMovieTicket.Helper;
 using BookingMovieTicket.Models;
 using BookingMovieTicket.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -9,7 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 // ==========================================
 // SERVICES
 // ==========================================
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<BookingMovieTicket.Helper.LayoutDataFilter>();
+});
+
 
 // DbContext chỉ đăng ký một lần qua DI
 builder.Services.AddDbContext<QuanLyDatVePhimContext>(option =>

@@ -1,4 +1,4 @@
-﻿@using Newtonsoft.Json
+@using Newtonsoft.Json
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
@@ -120,14 +120,12 @@
 
             <div class="border-top mt-auto p-3">
                 @{
-                    var session = Context.Session.GetString("NguoiDung");
-                    if(session != null)
+                    var adminName = Context.Session.GetString("AdminName") ?? User.Identity?.Name;
+                    if(!string.IsNullOrEmpty(adminName))
                     {
-                        NguoiDung admin = JsonConvert.DeserializeObject<NguoiDung>(session);
-
                         <a class="d-flex align-items-center p-3 rounded text-dark text-decoration-none hover:bg-light">
                             <span class="material-icons me-3 text-secondary">login</span>
-                            @admin.HoTen
+                            @adminName
                         </a>
 
                         <a asp-action="DangXuat" asp-controller="Admin"
