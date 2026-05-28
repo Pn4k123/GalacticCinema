@@ -11,6 +11,7 @@ using System.Security.Claims;
 namespace BookingMovieTicket.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly QuanLyDatVePhimContext db;
@@ -19,7 +20,7 @@ namespace BookingMovieTicket.Controllers
         {
             db = context;
         }
-        [Authorize]
+
         public IActionResult Index()
         {
             ViewBag.topPhims = db.ChiTietDonDatVes
@@ -28,43 +29,53 @@ namespace BookingMovieTicket.Controllers
                 {
                     TenPhim = g.Key.TenPhim,
                     DoanhThu = g.Sum(x => x.GiaVe),
-
                     Hinh = g.Key.Poster
                 })
                 .OrderByDescending(x => x.DoanhThu)
                 .Take(5)
                 .ToList();
-            
+
             ViewBag.donHangMoi = db.DonDatVes
-                                .Include(d => d.ChiTietDonDatVes)
-                                .OrderByDescending(d => d.ThoiGianDat).Select(d => new
-                                {
-                                    MaDon = d.MaDon,
-                                    TenND = d.MaNdNavigation.HoTen,
-                                    ThoiGianDat = d.ThoiGianDat,
-                                    tongTien = d.ChiTietDonDatVes != null ? d.ChiTietDonDatVes.Sum(ct => ct.GiaVe) : 0,
-                                    TrangThai = d.TrangThai
-                                })
-                                .Take(5)
-                                .ToList();
+                .Include(d => d.ChiTietDonDatVes)
+                .Include(d => d.MaNdNavigation)
+                .OrderByDescending(d => d.ThoiGianDat)
+                .Select(d => new
+                {
+                    MaDon = d.MaDon,
+                    TenND = d.MaNdNavigation.HoTen,
+                    ThoiGianDat = d.ThoiGianDat,
+                    tongTien = d.ChiTietDonDatVes != null ? d.ChiTietDonDatVes.Sum(ct => ct.GiaVe) : 0,
+                    TrangThai = d.TrangThai
+                })
+                .Take(5)
+                .ToList();
+
             return View();
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Login()
         {
+            if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Index");
+            }
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(DangNhapVM model)
         {
             if (ModelState.IsValid)
             {
                 var admin = db.NguoiDungs.SingleOrDefault(kh => kh.Email == model.Email);
-                if (admin == null||admin.VaiTro!="Admin")
+
+                if (admin == null || admin.VaiTro != "Admin")
                 {
-                    ModelState.AddModelError("", "Tài khoản không tồn tại");
+                    ModelState.AddModelError("", "Tài khoản không tồn tại hoặc không có quyền truy cập");
                 }
                 else
                 {
@@ -77,17 +88,16 @@ namespace BookingMovieTicket.Controllers
                         var claims = new List<Claim> {
                             new Claim(ClaimTypes.Email, admin.Email),
                             new Claim(ClaimTypes.Name, admin.HoTen),
-                            new Claim(ClaimTypes.NameIdentifier,admin.MaNd),
+                            new Claim(ClaimTypes.NameIdentifier, admin.MaNd),
                             new Claim(ClaimTypes.Role, "Admin")
                         };
 
                         var claimsIdentity = new ClaimsIdentity(claims, "login");
-
                         var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
                         await HttpContext.SignInAsync(claimsPrincipal);
-
-                        HttpContext.Session.SetString("NguoiDung", JsonConvert.SerializeObject(admin));
+                        HttpContext.Session.SetString("AdminName", admin.HoTen);
+                        HttpContext.Session.SetString("AdminId", admin.MaNd);
 
                         return RedirectToAction("Index");
                     }
@@ -96,11 +106,11 @@ namespace BookingMovieTicket.Controllers
             return View();
         }
 
-        [Authorize]
         public async Task<IActionResult> DangXuat()
         {
             await HttpContext.SignOutAsync();
-            HttpContext.Session.Remove("NguoiDung");
+            HttpContext.Session.Remove("AdminName");
+            HttpContext.Session.Remove("AdminId");
 
             return Redirect("/Admin");
         }

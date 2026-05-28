@@ -38,9 +38,18 @@ public partial class QuanLyDatVePhimContext : DbContext
     public virtual DbSet<Ve> Ves { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=SQL8006.site4now.net;Initial Catalog=db_ac41c5_qldv;User Id=db_ac41c5_qldv_admin;Password=K.khuong1470;Encrypt=True;TrustServerCertificate=True;");
-
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            // Fallback: đọc từ environment variable thay vì hardcode
+            var connectionString = Environment.GetEnvironmentVariable("MOVIE_DB_CONNECTION");
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                optionsBuilder.UseSqlServer(connectionString);
+            }
+            
+        }
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ChiTietDonDatVe>(entity =>

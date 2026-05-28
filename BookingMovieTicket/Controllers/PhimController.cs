@@ -7,10 +7,21 @@ namespace BookingMovieTicket.Controllers
 {
     public class PhimController : Controller
     {
-        QuanLyDatVePhimContext db = new QuanLyDatVePhimContext();
+        private readonly QuanLyDatVePhimContext db;
+
+        public PhimController(QuanLyDatVePhimContext context)
+        {
+            db = context;
+        }
         public IActionResult Index(string id)
         {
-            Phim p = db.Phims.Include(p=>p.MaTheLoais).FirstOrDefault(p => p.MaPhim == id);
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            Phim? p = db.Phims
+                .Include(p => p.MaTheLoais)
+                .FirstOrDefault(p => p.MaPhim == id);
+
+            if (p == null) return NotFound();
 
             ViewBag.DSTheLoai = p.MaTheLoais;
 

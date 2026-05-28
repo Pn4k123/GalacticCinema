@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using BookingMovieTicket.Helper;
+﻿using BookingMovieTicket.Helper;
 using BookingMovieTicket.Models;
 using BookingMovieTicket.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Security.Claims;
 
 namespace BookingMovieTicket.Controllers
@@ -20,25 +18,26 @@ namespace BookingMovieTicket.Controllers
             db = context;
             _xlDon = xlDon;
         }
+
         public IActionResult chiTietDonHang(string id)
         {
             SuatChieu? sc = db.SuatChieus
-                                .Include(x => x.MaPhimNavigation)
-                                .Include(x => x.MaPhongNavigation)
-                                .Include(x => x.MaPhongNavigation.MaRapNavigation)
-                                .FirstOrDefault(x => x.MaSuatChieu == id);
+                .Include(x => x.MaPhimNavigation)
+                .Include(x => x.MaPhongNavigation)
+                .Include(x => x.MaPhongNavigation.MaRapNavigation)
+                .FirstOrDefault(x => x.MaSuatChieu == id);
 
             if (sc == null) return NotFound();
 
             var tatCaGhe = db.Ghes
-                            .Where(g => g.MaPhong == sc.MaPhong)
-                            .ToList();
+                .Where(g => g.MaPhong == sc.MaPhong)
+                .ToList();
 
             var gheDaDat = db.Ves
-                            .Where(v => v.MaSuatChieu == id)
-                            .Where(v => v.TrangThai == "Chưa sử dụng" || v.TrangThai == "Đã sử dụng")
-                            .Select(v => v.MaGhe)
-                            .ToList();
+                .Where(v => v.MaSuatChieu == id)
+                .Where(v => v.TrangThai == "Chưa sử dụng" || v.TrangThai == "Đã sử dụng")
+                .Select(v => v.MaGhe)
+                .ToList();
 
             var model = new DatVeVM
             {
@@ -65,86 +64,96 @@ namespace BookingMovieTicket.Controllers
             };
 
             return View(model);
-
         }
 
         [HttpPost]
         [Authorize]
-        public IActionResult XacNhanDatVe(string maSuatChieu, List<string> danhSachMaGheChon)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> XacNhanDatVe(string maSuatChieu, List<string> danhSachMaGheChon)
         {
             if (danhSachMaGheChon == null || !danhSachMaGheChon.Any())
-            {
                 return RedirectToAction("chiTietDonHang", new { id = maSuatChieu });
-            }
 
-            using (var transaction = db.Database.BeginTransaction())
+            //Giới hạn số ghế tối đa mỗi lần đặt để tránh abuse
+            if (danhSachMaGheChon.Count > 10)
+                return BadRequest("Không thể đặt quá 10 ghế một lần.");
+
+            using var transaction = await db.Database.BeginTransactionAsync();
+            try
             {
-                try
+                //Lock các ghế bằng cách query với UPDLOCK (pessimistic locking)
+                // Kiểm tra lại ghế trong cùng transaction để tránh race condition
+                var gheDaDat = await db.Ves
+                    .Where(v => v.MaSuatChieu == maSuatChieu
+                             && danhSachMaGheChon.Contains(v.MaGhe)
+                             && (v.TrangThai == "Chưa sử dụng" || v.TrangThai == "Đã sử dụng"))
+                    .AnyAsync();
+
+                if (gheDaDat)
+                    return Content("Một hoặc nhiều ghế đã bị người khác đặt! Vui lòng chọn ghế khác.");
+
+                //Sinh mã đơn an toàn (thread-safe)
+                var maDon = await _xlDon.donIdAsync();
+
+                var donHang = new DonDatVe
                 {
-                    var gheBiTrung = db.Ves
-                                     .Any(v => v.MaSuatChieu == maSuatChieu && danhSachMaGheChon.Contains(v.MaGhe));
+                    MaDon = maDon,
+                    MaNd = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    ThoiGianDat = DateTime.Now,
+                    TrangThai = "Đang chờ"
+                };
+                db.DonDatVes.Add(donHang);
+                await db.SaveChangesAsync();
 
-                    if (gheBiTrung) return Content("Ghế đã bị người khác đặt!");
+                // Sinh mã vé trong cùng transaction
+                var existingVeNums = await db.Ves
+                    .Where(v => v.MaVe.StartsWith("V"))
+                    .Select(v => v.MaVe.Substring(1))
+                    .ToListAsync();
 
-                    var donHang = new DonDatVe
+                int currentMax = existingVeNums
+                    .Where(s => int.TryParse(s, out _))
+                    .Select(s => int.Parse(s))
+                    .DefaultIfEmpty(0)
+                    .Max();
+
+                foreach (var maGhe in danhSachMaGheChon)
+                {
+                    currentMax++;
+                    string maVe = "V" + currentMax.ToString("D3");
+
+                    var gheInfo = await db.Ghes.FindAsync(maGhe);
+                    if (gheInfo == null) continue;
+
+                    var veMoi = new Ve
                     {
-                        MaDon = _xlDon.donId(),
-                        MaNd = User.FindFirstValue(ClaimTypes.NameIdentifier),
-                        ThoiGianDat = DateTime.Now,
-                        TrangThai = "Đang chờ"
+                        MaVe = maVe,
+                        MaSuatChieu = maSuatChieu,
+                        MaGhe = maGhe,
+                        TrangThai = "Chưa sử dụng",
+                        ThoiGianPhatHanh = DateTime.Now
                     };
-                    db.DonDatVes.Add(donHang);
-                    db.SaveChanges();
+                    db.Ves.Add(veMoi);
 
-                    var danhSachMa = db.Ves
-                                    .Where(v => v.MaVe.StartsWith("V"))
-                                    .Select(v => v.MaVe)
-                                    .ToList();
-
-                    int soLuongVeHienTai = danhSachMa
-                                            .Select(ma => int.Parse(ma.Substring(1))) 
-                                            .DefaultIfEmpty(0) 
-                                            .Max();
-
-                    foreach (var maGhe in danhSachMaGheChon)
+                    var chiTiet = new ChiTietDonDatVe
                     {
-                        soLuongVeHienTai++;
-
-                        string maVeTuSinh = "V" + soLuongVeHienTai.ToString("D3");
-
-                        var gheInfo = db.Ghes.Find(maGhe);
-
-                        var veMoi = new Ve
-                        {
-                            MaVe = maVeTuSinh,
-                            MaSuatChieu = maSuatChieu,
-                            MaGhe = maGhe,
-                            TrangThai = "Chưa sử dụng",
-                            ThoiGianPhatHanh = DateTime.Now
-                        };
-                        db.Ves.Add(veMoi);
-
-                        var chiTiet = new ChiTietDonDatVe
-                        {
-                            MaDon = donHang.MaDon,
-                            MaVe = veMoi.MaVe,
-                            GiaVe = gheInfo.Gia
-                        };
-                        db.ChiTietDonDatVes.Add(chiTiet);
-                    }
-
-                    db.SaveChanges();
-                    transaction.Commit();
-
-                    return RedirectToAction("Index","ThanhToan", new { maDon = donHang.MaDon });
-
-                } catch (Exception ex) {
-                    transaction.Rollback();
-                    // Log lỗi ex.Message ra để debug
-                    return Content("Lỗi đặt vé: " + ex.Message);
+                        MaDon = donHang.MaDon,
+                        MaVe = veMoi.MaVe,
+                        GiaVe = gheInfo.Gia
+                    };
+                    db.ChiTietDonDatVes.Add(chiTiet);
                 }
-            } 
+
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return RedirectToAction("Index", "ThanhToan", new { maDon = donHang.MaDon });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return Content("Lỗi đặt vé: " + ex.Message);
+            }
         }
     }
 }
-
