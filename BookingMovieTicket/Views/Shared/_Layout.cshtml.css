@@ -1,65 +1,186 @@
-﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
+/* ============================================
+   Layout CSS Companion — GALACTIC CINEMA
+   Styles specific to _Layout.cshtml
+   ============================================ */
 
+/* ---------- Navbar Brand ---------- */
 a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+    white-space: normal;
+    text-align: center;
+    word-break: keep-all;
 }
 
-a {
-  color: #0077cc;
-}
-
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
+/* ---------- Nav pills / tabs override ---------- */
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    color: var(--gc-bg-primary);
+    background: var(--gc-accent-gradient);
+    border: none;
 }
 
+/* ---------- Borders ---------- */
 .border-top {
-  border-top: 1px solid #e5e5e5;
+    border-top: 1px solid var(--gc-border) !important;
 }
 .border-bottom {
-  border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid var(--gc-border) !important;
 }
 
+/* ---------- Box Shadow ---------- */
 .box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+    box-shadow: var(--gc-shadow-sm);
 }
 
+/* ---------- Accept Policy ---------- */
 button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
+    font-size: 1rem;
+    line-height: inherit;
 }
 
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
-}
+/* ============================================
+   MEGA MENU (Dark Theme)
+   ============================================ */
 
 .mega-dropdown:hover .mega-menu {
     display: block !important;
 }
 
-/* Mega menu rộng */
 .mega-menu {
     width: 800px;
     left: 50%;
     transform: translateX(-50%);
-    border-radius: 8px;
+    border-radius: var(--gc-radius-md) !important;
+    background: var(--gc-bg-secondary) !important;
+    border: 1px solid var(--gc-border) !important;
+    box-shadow: var(--gc-shadow-lg);
+    padding: 1.25rem !important;
 }
 
-/* Fix Bootstrap auto close */
 .mega-dropdown .dropdown-toggle::after {
     display: none;
+}
+
+/* Movie cards inside mega menu */
+.mega-menu .movie-card {
+    background: var(--gc-bg-card) !important;
+    border: 1px solid var(--gc-border) !important;
+    border-radius: var(--gc-radius-sm) !important;
+    transition: all var(--gc-transition-normal);
+}
+
+.mega-menu .movie-card:hover {
+    border-color: var(--gc-border-accent) !important;
+    transform: translateY(-4px);
+    box-shadow: var(--gc-shadow-glow);
+}
+
+.mega-menu .movie-card .card-img-top {
+    border-radius: var(--gc-radius-sm) var(--gc-radius-sm) 0 0;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+}
+
+.mega-menu .movie-card .card-body {
+    background: var(--gc-bg-card) !important;
+    padding: 0.5rem 0.75rem;
+}
+
+.mega-menu .movie-card .card-title {
+    font-size: 0.8rem;
+    color: var(--gc-text-primary);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mega-menu .movie-card .overlay {
+    background: linear-gradient(to top, rgba(10,10,22,0.9), rgba(10,10,22,0.5), transparent);
+    opacity: 0;
+    transition: opacity var(--gc-transition-normal);
+    border-radius: var(--gc-radius-sm);
+}
+
+.mega-menu .movie-card:hover .overlay {
+    opacity: 1;
+}
+
+/* ============================================
+   LOGIN / REGISTER MODALS (Dark Enhanced)
+   ============================================ */
+
+.modal-content {
+    background: var(--gc-bg-secondary) !important;
+    border: 1px solid var(--gc-border) !important;
+    border-radius: var(--gc-radius-lg) !important;
+    box-shadow: var(--gc-shadow-lg);
+    overflow: hidden;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gc-accent-gradient);
+    z-index: 1;
+}
+
+.modal-header {
+    border-bottom-color: var(--gc-border) !important;
+    padding-top: 1.5rem;
+}
+
+.modal-body input.form-control,
+.modal-body .form-select {
+    background: var(--gc-bg-card) !important;
+    border: 1px solid var(--gc-border) !important;
+    color: var(--gc-text-primary) !important;
+    border-radius: var(--gc-radius-sm);
+}
+
+.modal-body input.form-control:focus,
+.modal-body .form-select:focus {
+    border-color: var(--gc-accent) !important;
+    box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.15) !important;
+}
+
+.modal-body input.form-control::placeholder {
+    color: var(--gc-text-muted);
+}
+
+.modal-body label {
+    color: var(--gc-text-secondary);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.modal-body .btn-primary {
+    background: var(--gc-accent-gradient) !important;
+    border: none !important;
+    color: var(--gc-bg-primary) !important;
+    font-weight: 700;
+    padding: 0.6rem;
+    border-radius: var(--gc-radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all var(--gc-transition-normal);
+}
+
+.modal-body .btn-primary:hover {
+    box-shadow: var(--gc-shadow-glow-strong);
+    transform: translateY(-1px);
+}
+
+/* Validation errors in dark theme */
+.modal-body .text-danger,
+.modal-body .field-validation-error {
+    color: var(--gc-danger) !important;
+    font-size: 0.8rem;
+}
+
+.modal-body .input-validation-error {
+    border-color: var(--gc-danger) !important;
 }

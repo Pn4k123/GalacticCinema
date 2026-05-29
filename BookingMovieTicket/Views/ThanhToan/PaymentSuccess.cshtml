@@ -1,19 +1,172 @@
-﻿@{
+@{
     ViewData["Title"] = "Thanh toán thành công";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-5 text-center">
-    <div class="card shadow-sm p-5 border-0 rounded-4" style="max-width: 600px; margin: 0 auto;">
-        <div class="text-success mb-3">
-            <i class="bi bi-check-circle-fill" style="font-size: 4rem;"></i>
-        </div>
-        <h1 class="fw-bold text-success mb-3">Thanh Toán Thành Công!</h1>
-        <p class="text-muted mb-4">Cảm ơn bạn đã đặt vé tại Galactic Cinema. Mã vé đã được gửi đến email của bạn.</p>
+<style>
+    .gc-success-page {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
 
-        <div class="d-grid gap-2 col-8 mx-auto">
-            <a href="/" class="btn btn-primary btn-lg rounded-pill">Về Trang Chủ</a>
-            <a asp-controller="KhachHang" asp-action="LichSuGiaoDich" class="btn btn-outline-secondary btn-lg rounded-pill">Xem Lịch Sử Đặt Vé</a>
+    .gc-success-card {
+        max-width: 520px;
+        width: 100%;
+        background: var(--gc-bg-card);
+        border: 1px solid var(--gc-border);
+        border-radius: var(--gc-radius-xl);
+        padding: 3rem 2.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .gc-success-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--gc-success), #00d4ff);
+    }
+
+    .gc-success-icon-wrapper {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 1.5rem;
+        background: rgba(46, 213, 115, 0.1);
+        border: 2px solid rgba(46, 213, 115, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: successPop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gc-success-icon-wrapper i {
+        font-size: 2.5rem;
+        color: var(--gc-success);
+    }
+
+    @@keyframes successPop {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .gc-success-title {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: var(--gc-success);
+        margin-bottom: 0.75rem;
+    }
+
+    .gc-success-desc {
+        color: var(--gc-text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .gc-success-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        max-width: 280px;
+        margin: 0 auto;
+    }
+
+    .gc-btn-home {
+        padding: 0.7rem;
+        border: none;
+        border-radius: var(--gc-radius-md);
+        background: linear-gradient(135deg, var(--gc-cyan), #0099cc);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .gc-btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+        color: #fff;
+    }
+
+    .gc-btn-history {
+        padding: 0.65rem;
+        border: 1px solid var(--gc-border);
+        border-radius: var(--gc-radius-md);
+        background: transparent;
+        color: var(--gc-text-secondary);
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .gc-btn-history:hover {
+        border-color: var(--gc-cyan);
+        color: var(--gc-cyan);
+        background: rgba(0, 212, 255, 0.06);
+    }
+
+    /* Confetti particles */
+    .gc-confetti {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        animation: confettiFall 3s ease-in-out infinite;
+        opacity: 0.7;
+    }
+
+    @@keyframes confettiFall {
+        0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+        20% { opacity: 0.7; }
+        100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+    }
+</style>
+
+<div class="gc-success-page">
+    <div class="gc-success-card">
+        <!-- Confetti decorations -->
+        <div class="gc-confetti" style="top: 10px; left: 15%; background: var(--gc-accent); animation-delay: 0s;"></div>
+        <div class="gc-confetti" style="top: 10px; left: 35%; background: var(--gc-cyan); animation-delay: 0.5s;"></div>
+        <div class="gc-confetti" style="top: 10px; left: 55%; background: var(--gc-success); animation-delay: 1s;"></div>
+        <div class="gc-confetti" style="top: 10px; left: 75%; background: var(--gc-purple); animation-delay: 1.5s;"></div>
+        <div class="gc-confetti" style="top: 10px; left: 85%; background: var(--gc-accent); animation-delay: 0.3s;"></div>
+
+        <div class="gc-success-icon-wrapper">
+            <i class="fas fa-check"></i>
+        </div>
+
+        <h1 class="gc-success-title">Thanh Toán Thành Công!</h1>
+        <p class="gc-success-desc">
+            Cảm ơn bạn đã đặt vé tại <strong>Galactic Cinema</strong>.<br>
+            Mã vé đã được gửi đến email của bạn. Chúc bạn xem phim vui vẻ! 🎬
+        </p>
+
+        <div class="gc-success-actions">
+            <a href="/" class="gc-btn-home">
+                <i class="fas fa-home"></i> Về Trang Chủ
+            </a>
+            <a asp-controller="KhachHang" asp-action="LichSuGiaoDich" class="gc-btn-history">
+                <i class="fas fa-history"></i> Xem Lịch Sử Đặt Vé
+            </a>
         </div>
     </div>
 </div>

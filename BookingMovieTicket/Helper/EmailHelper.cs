@@ -18,7 +18,6 @@ namespace BookingMovieTicket.Helper
 
         public string GenerateQrCode(string content)
         {
-            // ... (Hàm tạo QR Code giữ nguyên) ...
             using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
             {
                 QRCodeData qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
@@ -30,7 +29,6 @@ namespace BookingMovieTicket.Helper
             }
         }
 
-        // --- CẬP NHẬT HÀM GỬI EMAIL ---
         public async Task SendTicketEmail(string toEmail, string subject, string bodyHtml, string qrCodeBase64)
         {
             var mailSettings = _config.GetSection("EmailSettings");
@@ -59,14 +57,11 @@ namespace BookingMovieTicket.Helper
                 // 2. Xử lý hình ảnh QR Code
                 if (!string.IsNullOrEmpty(qrCodeBase64))
                 {
-                    // Chuyển Base64 thành Stream
                     byte[] imageBytes = Convert.FromBase64String(qrCodeBase64);
                     MemoryStream ms = new MemoryStream(imageBytes);
 
-                    // Tạo LinkedResource (Tài nguyên liên kết)
                     LinkedResource qrResource = new LinkedResource(ms, "image/png");
 
-                    // QUAN TRỌNG: Đặt ContentId trùng với cái bạn gọi trong HTML (cid:qrcode)
                     qrResource.ContentId = "qrcode";
                     qrResource.TransferEncoding = TransferEncoding.Base64;
 
@@ -74,7 +69,6 @@ namespace BookingMovieTicket.Helper
                     htmlView.LinkedResources.Add(qrResource);
                 }
 
-                // 3. Gắn View vào Email
                 message.AlternateViews.Add(htmlView);
                 message.IsBodyHtml = true;
 

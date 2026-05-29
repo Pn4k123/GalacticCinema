@@ -32,7 +32,7 @@ builder.Services.AddSession(option =>
     option.IdleTimeout = TimeSpan.FromMinutes(30); 
     option.Cookie.HttpOnly = true;
     option.Cookie.IsEssential = true;
-    option.Cookie.SecurePolicy = CookieSecurePolicy.Always; //Chỉ gửi cookie qua HTTPS
+    option.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; //HTTPS hoặc HTTP 
 });
 
 // Tách biệt scheme đăng nhập cho Admin và KhachHang
@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/KhachHang/DangNhap";
         options.AccessDeniedPath = "/AccessDenied";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
         options.SlidingExpiration = true;
     });

@@ -1,128 +1,462 @@
-﻿@model BookingMovieTicket.ViewModels.DatVeVM
+@model BookingMovieTicket.ViewModels.DatVeVM
 @{
     ViewData["Title"] = "Đặt Vé: " + Model.TenPhim;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
-    /* --- CSS CỦA BẠN (GIỮ NGUYÊN) --- */
-    .screen {
-        background-color: #999;
-        height: 30px;
-        width: 80%;
-        margin: 0 auto 30px auto;
+    /* ============================================
+       SEAT SELECTION — Cinema Dark Theme
+       ============================================ */
+
+    .gc-seat-page {
+        padding: 2rem 0;
+    }
+
+    /* --- SCREEN --- */
+    .gc-screen-wrapper {
         text-align: center;
-        line-height: 30px;
-        color: white;
-        font-weight: bold;
-        border-radius: 5px;
-        box-shadow: 0 5px 5px #ccc;
+        margin-bottom: 2.5rem;
+        padding: 0 2rem;
     }
 
-    .seat-grid {
-        display: grid;
-        /* Grid tự động xuống dòng, mỗi ghế rộng khoảng 40px */
-        grid-template-columns: repeat(10, 1fr);
-        gap: 10px;
-        max-width: 600px;
+    .gc-screen {
+        position: relative;
+        max-width: 500px;
         margin: 0 auto;
+        height: 8px;
+        background: linear-gradient(90deg, transparent, var(--gc-cyan), var(--gc-cyan), transparent);
+        border-radius: 50%;
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.3), 0 0 60px rgba(0, 212, 255, 0.1);
     }
 
-    /* --- SỬA ĐỔI QUAN TRỌNG: CHECKBOX HACK --- */
-    /* Ẩn input checkbox đi */
+    .gc-screen-label {
+        display: block;
+        margin-top: 0.75rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: var(--gc-text-muted);
+        font-weight: 600;
+    }
+
+    /* --- SEAT LEGEND --- */
+    .gc-seat-legend {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .gc-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--gc-text-secondary);
+        font-weight: 500;
+    }
+
+    .gc-legend-box {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1.5px solid var(--gc-border);
+    }
+
+    .gc-legend-box.regular {
+        background: var(--gc-bg-card);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .gc-legend-box.vip {
+        background: rgba(245, 197, 24, 0.15);
+        border-color: rgba(245, 197, 24, 0.4);
+    }
+
+    .gc-legend-box.sold {
+        background: rgba(255, 71, 87, 0.2);
+        border-color: rgba(255, 71, 87, 0.4);
+    }
+
+    .gc-legend-box.selected {
+        background: rgba(0, 212, 255, 0.2);
+        border-color: var(--gc-cyan);
+        box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+    }
+
+    /* --- SEAT GRID --- */
+    .gc-seat-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 8px;
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 0 0.5rem;
+    }
+
+    /* Hide checkbox */
     .seat-checkbox {
         display: none;
     }
 
-    /* Label đóng vai trò là ô ghế hiển thị (.seat) */
-    .seat-label {
-        height: 40px;
-        background-color: #e0e0e0;
-        border: 1px solid #ccc;
-        border-radius: 5px;
+    /* Base seat label */
+    .gc-seat {
+        height: 38px;
+        border-radius: 8px 8px 4px 4px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 12px;
-        font-weight: bold;
-        user-select: none; /* Chặn bôi đen text */
-        transition: 0.2s;
+        font-size: 0.7rem;
+        font-weight: 700;
+        user-select: none;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        letter-spacing: 0.5px;
+
+        /* Default: Regular seat */
+        background: var(--gc-bg-card);
+        border: 1.5px solid rgba(255, 255, 255, 0.1);
+        color: var(--gc-text-secondary);
     }
 
-        /* --- TRẠNG THÁI MÀU SẮC --- */
-
-        /* 1. Ghế VIP */
-        .seat-label.vip {
-            background-color: #fff3cd;
-            border-color: #ffecb5;
-            color: #856404;
-        }
-
-        /* 2. Ghế Đã Bán (Disabled) */
-        .seat-label.sold {
-            background-color: #dc3545;
-            color: white;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-    /* 3. Ghế Đang Chọn (Khi Checkbox được checked) */
-    /* Đây là kỹ thuật CSS: Khi input check thì label đứng ngay sau nó sẽ đổi màu */
-    .seat-checkbox:checked + .seat-label {
-        background-color: #28a745 !important;
-        color: white;
-        border-color: #28a745;
-        transform: scale(1.1); /* Hiệu ứng phóng to nhẹ */
+    .gc-seat:hover:not(.sold) {
+        border-color: var(--gc-cyan);
+        background: rgba(0, 212, 255, 0.08);
+        color: var(--gc-text-primary);
+        transform: scale(1.08);
+        box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
     }
 
-    .info-box {
-        border: 1px solid #ddd;
-        padding: 15px;
-        border-radius: 5px;
-        background-color: #f9f9f9;
+    /* VIP seat */
+    .gc-seat.vip {
+        background: rgba(245, 197, 24, 0.1);
+        border-color: rgba(245, 197, 24, 0.35);
+        color: var(--gc-accent);
+    }
+
+    .gc-seat.vip:hover:not(.sold) {
+        background: rgba(245, 197, 24, 0.18);
+        border-color: var(--gc-accent);
+        box-shadow: 0 0 12px rgba(245, 197, 24, 0.2);
+    }
+
+    /* Sold seat */
+    .gc-seat.sold {
+        background: rgba(255, 71, 87, 0.12);
+        border-color: rgba(255, 71, 87, 0.25);
+        color: rgba(255, 71, 87, 0.5);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .gc-seat.sold::after {
+        content: '×';
+        position: absolute;
+        font-size: 1.1rem;
+        color: rgba(255, 71, 87, 0.6);
+        font-weight: 400;
+    }
+
+    .gc-seat.sold span {
+        opacity: 0;
+    }
+
+    /* Selected seat (checked) */
+    .seat-checkbox:checked + .gc-seat {
+        background: rgba(0, 212, 255, 0.2) !important;
+        border-color: var(--gc-cyan) !important;
+        color: #fff !important;
+        transform: scale(1.1);
+        box-shadow: 0 0 16px rgba(0, 212, 255, 0.35), inset 0 0 12px rgba(0, 212, 255, 0.1) !important;
+    }
+
+    .seat-checkbox:checked + .gc-seat::before {
+        content: '✓';
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 16px;
+        height: 16px;
+        background: var(--gc-cyan);
+        border-radius: 50%;
+        font-size: 0.55rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gc-bg-primary);
+        font-weight: 900;
+    }
+
+    /* --- INFO BOX (SIDEBAR) --- */
+    .gc-booking-info {
+        background: var(--gc-bg-card);
+        border: 1px solid var(--gc-border);
+        border-radius: var(--gc-radius-lg);
+        padding: 1.5rem;
         position: sticky;
-        top: 20px; /* Giúp khung thanh toán chạy theo khi cuộn */
+        top: 90px;
+        overflow: hidden;
+    }
+
+    .gc-booking-info::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--gc-cyan), var(--gc-accent));
+    }
+
+    .gc-booking-poster {
+        width: 100%;
+        max-width: 180px;
+        border-radius: var(--gc-radius-md);
+        border: 1px solid var(--gc-border);
+        margin-bottom: 1rem;
+    }
+
+    .gc-booking-movie-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--gc-text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .gc-booking-divider {
+        border: none;
+        height: 1px;
+        background: var(--gc-border);
+        margin: 1rem 0;
+    }
+
+    .gc-booking-detail {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0;
+    }
+
+    .gc-booking-detail-label {
+        color: var(--gc-text-muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .gc-booking-detail-value {
+        color: var(--gc-text-primary);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Selected seats display */
+    .gc-selected-seats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        min-height: 32px;
+        align-items: center;
+    }
+
+    .gc-selected-seat-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 212, 255, 0.12);
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        color: var(--gc-cyan);
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .gc-no-seat-text {
+        color: var(--gc-text-muted);
+        font-size: 0.8rem;
+        font-style: italic;
+    }
+
+    /* Total price */
+    .gc-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        margin-top: 0.5rem;
+    }
+
+    .gc-total-label {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--gc-text-primary);
+    }
+
+    .gc-total-price {
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: var(--gc-accent);
+    }
+
+    /* Pay button */
+    .gc-btn-pay {
+        width: 100%;
+        padding: 0.75rem;
+        border: none;
+        border-radius: var(--gc-radius-md);
+        background: linear-gradient(135deg, var(--gc-cyan) 0%, #0099cc 100%);
+        color: #fff;
+        font-weight: 800;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .gc-btn-pay:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 212, 255, 0.35);
+    }
+
+    .gc-btn-pay:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .gc-btn-back {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid var(--gc-border);
+        border-radius: var(--gc-radius-md);
+        background: transparent;
+        color: var(--gc-text-secondary);
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        margin-top: 0.5rem;
+        text-decoration: none;
+        display: block;
+    }
+
+    .gc-btn-back:hover {
+        border-color: var(--gc-text-muted);
+        color: var(--gc-text-primary);
+        background: var(--gc-bg-card-hover);
+    }
+
+    /* --- SECTION TITLE --- */
+    .gc-seat-title {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .gc-seat-title h3 {
+        font-weight: 900;
+        font-size: 1.4rem;
+        color: var(--gc-text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .gc-seat-title h3 i {
+        color: var(--gc-cyan);
+    }
+
+    /* --- RESPONSIVE --- */
+    @@media (max-width: 767.98px) {
+        .gc-seat-grid {
+            gap: 5px;
+        }
+
+        .gc-seat {
+            height: 32px;
+            font-size: 0.6rem;
+            border-radius: 6px 6px 3px 3px;
+        }
+
+        .gc-seat-legend {
+            gap: 0.75rem;
+        }
+
+        .gc-legend-item {
+            font-size: 0.7rem;
+        }
+
+        .gc-legend-box {
+            width: 22px;
+            height: 22px;
+        }
     }
 </style>
 
-<div class="container py-4">
+<div class="gc-seat-page">
     <form asp-controller="DonDatVe" asp-action="XacNhanDatVe" method="post">
 
         <input type="hidden" name="maSuatChieu" value="@Model.MaSuatChieu" />
 
-        <div class="row">
-            <div class="col-md-8">
-                <h3 class="text-center mb-4">SƠ ĐỒ CHỖ NGỒI</h3>
-                <div class="screen">MÀN HÌNH</div>
-
-                <div class="text-center mb-4">
-                    <span class="badge bg-light text-dark border me-2">Thường</span>
-                    <span class="badge bg-warning text-dark me-2">VIP</span>
-                    <span class="badge bg-danger me-2">Đã bán</span>
-                    <span class="badge bg-success">Đang chọn</span>
+        <div class="row g-4">
+            <!-- ========== LEFT: Seat Map ========== -->
+            <div class="col-lg-8">
+                <div class="gc-seat-title">
+                    <h3><i class="fas fa-couch"></i> Sơ Đồ Chỗ Ngồi</h3>
                 </div>
 
-                <div class="seat-grid">
+                <!-- Screen -->
+                <div class="gc-screen-wrapper">
+                    <div class="gc-screen"></div>
+                    <span class="gc-screen-label">Màn hình</span>
+                </div>
+
+                <!-- Legend -->
+                <div class="gc-seat-legend">
+                    <div class="gc-legend-item">
+                        <div class="gc-legend-box regular"></div>
+                        Thường
+                    </div>
+                    <div class="gc-legend-item">
+                        <div class="gc-legend-box vip"></div>
+                        VIP
+                    </div>
+                    <div class="gc-legend-item">
+                        <div class="gc-legend-box sold"></div>
+                        Đã bán
+                    </div>
+                    <div class="gc-legend-item">
+                        <div class="gc-legend-box selected"></div>
+                        Đang chọn
+                    </div>
+                </div>
+
+                <!-- Seat Grid -->
+                <div class="gc-seat-grid">
                     @foreach (var ghe in Model.DanhSachGhe)
                     {
-                        // Xác định class VIP hay Thường
                         var vipClass = (ghe.LoaiGhe != null && ghe.LoaiGhe.ToUpper().Contains("VIP")) ? "vip" : "";
-
-                        // Xác định class Đã bán
                         var soldClass = ghe.DaDat ? "sold" : "";
 
                         <div class="seat-item">
                             @if (ghe.DaDat)
                             {
-                                // Nếu đã đặt: Chỉ hiện Label, không có Checkbox (để không click được)
-                                <div class="seat-label @soldClass">
-                                    @ghe.HangGhe@ghe.SoGhe
+                                <div class="gc-seat @soldClass">
+                                    <span>@ghe.HangGhe@ghe.SoGhe</span>
                                 </div>
                             }
                             else
                             {
-                                // Nếu chưa đặt: Hiện Checkbox + Label
                                 <input type="checkbox"
                                        class="seat-checkbox"
                                        id="seat-@ghe.MaGhe"
@@ -131,8 +465,8 @@
                                        data-price="@ghe.Gia"
                                        data-name="@ghe.HangGhe@ghe.SoGhe" />
 
-                                <label for="seat-@ghe.MaGhe" class="seat-label @vipClass">
-                                    @ghe.HangGhe@ghe.SoGhe
+                                <label for="seat-@ghe.MaGhe" class="gc-seat @vipClass">
+                                    <span>@ghe.HangGhe@ghe.SoGhe</span>
                                 </label>
                             }
                         </div>
@@ -140,22 +474,54 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="info-box">                   
-                    <h5 class="text-black">@Model.TenPhim</h5>
-                    <img src="@Model.Poster" alt="Poster Phim" class="w-100" style="max-width:60%;"/>
-                    <hr>
-                    <p><strong>Rạp:</strong> @Model.TenPhong</p>
-                    <p><strong>Suất:</strong> @Model.NgayChieu.ToString("dd/MM/yyyy") @Model.GioChieu</p>
-                    <hr>
-                    <p>Ghế chọn: <strong id="txtGhe" class="text-success"></strong></p>
-                    <p>Tổng tiền: <strong id="txtTien" class="text-danger fs-4"></strong></p>
+            <!-- ========== RIGHT: Booking Info ========== -->
+            <div class="col-lg-4">
+                <div class="gc-booking-info">
+                    <h5 class="gc-booking-movie-title">@Model.TenPhim</h5>
+                    <img src="@Model.Poster" alt="Poster @Model.TenPhim" class="gc-booking-poster" />
 
-                    <button type="submit" class="btn btn-success w-100 mt-3" id="btnThanhToan" disabled>
-                        Thanh Toán Ngay
+                    <hr class="gc-booking-divider" />
+
+                    <div class="gc-booking-detail">
+                        <span class="gc-booking-detail-label"><i class="fas fa-building me-1"></i> Rạp</span>
+                        <span class="gc-booking-detail-value" style="color: var(--gc-cyan);">@Model.TenRap</span>
+                    </div>
+                    <div class="gc-booking-detail">
+                        <span class="gc-booking-detail-label"><i class="fas fa-door-open me-1"></i> Phòng</span>
+                        <span class="gc-booking-detail-value">@Model.TenPhong</span>
+                    </div>
+                    <div class="gc-booking-detail">
+                        <span class="gc-booking-detail-label"><i class="fas fa-calendar-alt me-1"></i> Ngày</span>
+                        <span class="gc-booking-detail-value" style="color: var(--gc-cyan);">@Model.NgayChieu.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="gc-booking-detail">
+                        <span class="gc-booking-detail-label"><i class="fas fa-clock me-1"></i> Suất</span>
+                        <span class="gc-booking-detail-value" style="color: var(--gc-cyan);">@Model.GioChieu</span>
+                    </div>
+
+                    <hr class="gc-booking-divider" />
+
+                    <div>
+                        <span class="gc-booking-detail-label mb-2 d-block"><i class="fas fa-chair me-1"></i> Ghế đã chọn</span>
+                        <div class="gc-selected-seats" id="seatTagsContainer">
+                            <span class="gc-no-seat-text" id="noSeatText">Chưa chọn ghế nào...</span>
+                        </div>
+                    </div>
+
+                    <hr class="gc-booking-divider" />
+
+                    <div class="gc-total-row">
+                        <span class="gc-total-label">Tổng tiền</span>
+                        <span class="gc-total-price" id="txtTien">0 đ</span>
+                    </div>
+
+                    <button type="submit" class="gc-btn-pay" id="btnThanhToan" disabled>
+                        <i class="fas fa-credit-card"></i> Thanh Toán Ngay
                     </button>
 
-                    <a href="@Url.Action("Index", "Phim",new {id = Model.MaPhim}) " class="btn btn-outline-secondary w-100 mt-2">Quay lại</a>
+                    <a href="@Url.Action("Index", "Phim", new { id = Model.MaPhim })" class="gc-btn-back">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
+                    </a>
                 </div>
             </div>
         </div>
@@ -165,38 +531,44 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const checkboxes = document.querySelectorAll('.seat-checkbox');
-        const txtGhe = document.getElementById('txtGhe');
+        const seatTagsContainer = document.getElementById('seatTagsContainer');
+        const noSeatText = document.getElementById('noSeatText');
         const txtTien = document.getElementById('txtTien');
         const btnThanhToan = document.getElementById('btnThanhToan');
 
-        // Hàm cập nhật mỗi khi click
         function updateSummary() {
             let total = 0;
             let selectedSeats = [];
 
             checkboxes.forEach(cb => {
                 if (cb.checked) {
-                    // Cộng tiền
                     total += parseFloat(cb.getAttribute('data-price'));
-                    // Lấy tên ghế
                     selectedSeats.push(cb.getAttribute('data-name'));
                 }
             });
 
-            // Cập nhật giao diện
+            // Update seat tags
+            seatTagsContainer.innerHTML = '';
             if (selectedSeats.length > 0) {
-                txtGhe.innerText = selectedSeats.join(', ');
-                btnThanhToan.removeAttribute('disabled'); // Bật nút thanh toán
+                selectedSeats.forEach(seat => {
+                    const tag = document.createElement('span');
+                    tag.className = 'gc-selected-seat-tag';
+                    tag.textContent = seat;
+                    seatTagsContainer.appendChild(tag);
+                });
+                btnThanhToan.removeAttribute('disabled');
             } else {
-                txtGhe.innerText = '...';
-                btnThanhToan.setAttribute('disabled', 'disabled'); // Tắt nút nếu chưa chọn
+                const noText = document.createElement('span');
+                noText.className = 'gc-no-seat-text';
+                noText.textContent = 'Chưa chọn ghế nào...';
+                seatTagsContainer.appendChild(noText);
+                btnThanhToan.setAttribute('disabled', 'disabled');
             }
 
-            // Format tiền Việt Nam
+            // Format VND
             txtTien.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' đ';
         }
 
-        // Gắn sự kiện change cho tất cả checkbox
         checkboxes.forEach(cb => {
             cb.addEventListener('change', updateSummary);
         });

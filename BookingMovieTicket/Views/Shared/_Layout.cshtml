@@ -1,46 +1,54 @@
 @using BookingMovieTicket.ViewModels
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CINEMA</title>
+    <meta name="description" content="GALACTIC CINEMA - Hệ thống đặt vé xem phim trực tuyến hàng đầu. Xem phim mới nhất, đặt vé nhanh chóng." />
+    <title>@ViewData["Title"] - GALACTIC CINEMA</title>
     <script type="importmap"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BookingMovieTicket.styles.css" asp-append-version="true" />
-
-    <style>
-        .navbar-nav 
-        
-        .nav-link:hover {
-            color: #ff9900 !important;
-        }
-        .nav-link a:hover {
-            color: #ff9900 !important;
-        }
-
-        #openLogin:hover,
-        #openRegister:hover {
-            color: #ff9900 !important;
-        }
-    </style>
 </head>
 <body>
+    <!-- ========== NAVBAR ========== -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light text-bg-light border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GALACTIC CINEMA</a>
-                <div class="navbar-collapse collapse">
+        <nav class="navbar navbar-expand-lg fixed-top gc-navbar" id="mainNavbar">
+            <div class="container">
+                <a class="navbar-brand gc-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    GALACTIC CINEMA
+                </a>
+
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <!-- Center nav -->
                     <ul class="navbar-nav mx-auto">
                         <li class="nav-item dropdown mega-dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownPhim" role="button">
-                                Phim
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPhim" role="button">
+                                <i class="fas fa-film me-1"></i> Phim
                             </a>
-
                             <div class="dropdown-menu mega-menu p-3" aria-labelledby="navbarDropdownPhim">
-                                <div class="dropdown-item-text fw-bold text-md">Phim đang chiếu</div>
+                                <div class="dropdown-item-text fw-bold text-md">
+                                    <i class="fas fa-play-circle me-1" style="color: var(--gc-accent);"></i> Phim đang chiếu
+                                </div>
                                 <div class="row">
                                     @foreach (var item in ViewBag.PhimDangChieu ?? new List<PhimVM>())
                                     {
@@ -56,10 +64,11 @@
                                             </div>
                                         </div>
                                     }
-
                                 </div>
                                 <hr class="dropdown-divider">
-                                <div class="dropdown-item-text fw-bold text-md">Phim sắp chiếu</div>
+                                <div class="dropdown-item-text fw-bold text-md">
+                                    <i class="fas fa-clock me-1" style="color: var(--gc-accent);"></i> Phim sắp chiếu
+                                </div>
                                 <div class="row">
                                     @foreach (var item in ViewBag.PhimSapChieu ?? new List<PhimVM>())
                                     {
@@ -73,7 +82,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     }
                                 </div>
@@ -81,31 +89,39 @@
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-black" data-bs-toggle="dropdown">Rạp</a>
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-building me-1"></i> Rạp
+                            </a>
                             <ul class="dropdown-menu">
                                 @foreach(var item in ViewBag.DSRap)
                                 {
                                     <li><a class="dropdown-item">@item.TenRap</a></li>
                                 }
-   
                             </ul>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-black" href="#">Góc Điện Ảnh</a>
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-newspaper me-1"></i> Góc Điện Ảnh
+                            </a>
                         </li>
                     </ul>
 
-                    <ul class="navbar-nav navbar-expand-sm ms-auto">
+                    <!-- Right nav -->
+                    <ul class="navbar-nav ms-auto gap-2">
                         @{
                             var session = Context.Session.GetString("NguoiDung");
                             if(session == null)
                             {
-                                <li>
-                                    <a class="nav-link text-black" id="openLogin">Đăng Nhập</a>
+                                <li class="nav-item">
+                                    <a class="gc-auth-btn nav-link" id="openLogin">
+                                        <i class="fas fa-sign-in-alt me-1"></i> Đăng Nhập
+                                    </a>
                                 </li>
-                                <li>
-                                    <a class="nav-link text-black" id="openRegister">Đăng Ký</a>
+                                <li class="nav-item">
+                                    <a class="gc-auth-btn gc-auth-btn-fill nav-link" id="openRegister">
+                                        <i class="fas fa-user-plus me-1"></i> Đăng Ký
+                                    </a>
                                 </li>
                             }
                             else
@@ -113,22 +129,27 @@
                                 var kh = Newtonsoft.Json.JsonConvert.DeserializeObject<BookingMovieTicket.ViewModels.UserSessionVM>(session);
                                 if (kh != null)
                                 {
-                                    <li>
-                                        <a asp-action="khachHangProfile" asp-controller="KhachHang" class="nav-link text-black">@kh.HoTen</a>
+                                    <li class="nav-item">
+                                        <a asp-action="khachHangProfile" asp-controller="KhachHang" class="nav-link">
+                                            <i class="fas fa-user-circle me-1" style="color: var(--gc-accent);"></i> @kh.HoTen
+                                        </a>
                                     </li>
-                                    <li>
-                                        <a asp-action="DangXuat" asp-controller="KhachHang" class="nav-link text-black">Đăng Xuất</a>
+                                    <li class="nav-item">
+                                        <a asp-action="DangXuat" asp-controller="KhachHang" class="gc-auth-btn nav-link">
+                                            <i class="fas fa-sign-out-alt me-1"></i> Đăng Xuất
+                                        </a>
                                     </li>
                                 }
                             }
-
                         }
-                                            
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
+    <!-- Spacer for fixed navbar -->
+    <div style="height: 68px;"></div>
 
     <div class="container">
         <main role="main" class="pb-3">
@@ -136,50 +157,100 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted bg-black">
-        <div class="container text-light">
-            &copy; 2025 - XayDungUngDungWEBDatVeXemPhimTrucTuyen - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
+    <!-- ========== FOOTER ========== -->
+    <footer class="gc-footer">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Brand Column -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="gc-footer-brand">GALACTIC CINEMA</div>
+                    <p class="gc-footer-desc">
+                        Hệ thống đặt vé xem phim trực tuyến hàng đầu Việt Nam. Trải nghiệm điện ảnh đỉnh cao với công nghệ hiện đại và dịch vụ chuyên nghiệp.
+                    </p>
+                    <div class="gc-footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
 
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="gc-footer-title">Danh Mục</h6>
+                    <ul class="gc-footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i> Phim đang chiếu</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i> Phim sắp chiếu</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i> Góc điện ảnh</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i> Khuyến mãi</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="gc-footer-title">Hỗ Trợ</h6>
+                    <ul class="gc-footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i> Hướng dẫn mua vé</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i> Chính sách hoàn vé</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i> Câu hỏi thường gặp</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Privacy"><i class="fas fa-chevron-right" style="font-size:0.6rem;"></i> Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="gc-footer-title">Liên Hệ</h6>
+                    <ul class="gc-footer-links">
+                        <li><a href="#"><i class="fas fa-phone me-1"></i> 1900-xxxx</a></li>
+                        <li><a href="#"><i class="fas fa-envelope me-1"></i> support&#64;galacticcinema.vn</a></li>
+                        <li><a href="#"><i class="fas fa-map-marker-alt me-1"></i> TP. Hồ Chí Minh, Việt Nam</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom bar -->
+            <div class="gc-footer-bottom">
+                <p>&copy; 2025 GALACTIC CINEMA. All rights reserved.</p>
+                <p>Designed with <i class="fas fa-heart" style="color: var(--gc-danger);"></i> for cinema lovers</p>
+            </div>
+        </div>
     </footer>
 
+    <!-- ========== MODALS ========== -->
+    <!-- Register Modal -->
     <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
                 <div class="modal-header border-bottom-0">
-                    <h1 class="modal-title fs-4 fw-bold text-center w-100">Đăng Ký Tài Khoản</h1>
+                    <h1 class="modal-title fs-4 fw-bold text-center w-100">
+                        <i class="fas fa-user-plus me-2" style="color: var(--gc-accent);"></i> Đăng Ký Tài Khoản
+                    </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body p-3" id="registerContent">
-                   
                 </div>
-
             </div>
         </div>
     </div>
 
-
+    <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 shadow">
-
+            <div class="modal-content">
                 <div class="modal-header border-bottom-0">
-                    <h1 class="modal-title fs-4 fw-bold text-center w-100" id="loginModalLabel">Đăng Nhập</h1>
+                    <h1 class="modal-title fs-4 fw-bold text-center w-100" id="loginModalLabel">
+                        <i class="fas fa-sign-in-alt me-2" style="color: var(--gc-accent);"></i> Đăng Nhập
+                    </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
                 <div class="modal-body p-4 pt-0" id="loginContent">
-                   
                 </div>
-
             </div>
         </div>
     </div>
 
-
-    <div class="toast-container position-fixed top-0 end-0 p-3">
+    <!-- Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
         <div id="alertToast" class="toast align-items-center text-bg-danger border-0" role="alert">
             <div class="d-flex">
                 <div class="toast-body">
@@ -189,42 +260,49 @@
             </div>
         </div>
     </div>
-  
+
+    <!-- ========== SCRIPTS ========== -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-                function showToast(message, type = "danger") {
+        // ===== Navbar scroll effect =====
+        window.addEventListener('scroll', function () {
+            const navbar = document.getElementById('mainNavbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // ===== Toast helper =====
+        function showToast(message, type = "danger") {
             $("#toastMessage").text(message);
             $("#alertToast").removeClass("text-bg-danger text-bg-success");
             $("#alertToast").addClass("text-bg-" + type);
-
             const toast = new bootstrap.Toast(document.getElementById("alertToast"));
             toast.show();
         }
 
-                $(document).on("click", ".openDon", function (e) {
+        // ===== Order click =====
+        $(document).on("click", ".openDon", function (e) {
             e.preventDefault();
-
-            var isLogged = $(this).data("logged");  //true/false
+            var isLogged = $(this).data("logged");
             var suatId = $(this).data("id");
-
             if (!isLogged) {
                 showToast("Vui lòng đăng nhập để đặt vé.", "danger");
                 return;
             }
-
             window.location.href = "/DonDatVe/chiTietDonHang?id=" + suatId;
         });
 
-                $("#openRegister").on("click", function (e) {
+        // ===== Register modal =====
+        $("#openRegister").on("click", function (e) {
             e.preventDefault();
-
             $.ajax({
                 url: "/KhachHang/DangKy",
                 type: "GET",
@@ -235,9 +313,9 @@
             });
         });
 
-          $("#openLogin").on("click", function (e) {
+        // ===== Login modal =====
+        $("#openLogin").on("click", function (e) {
             e.preventDefault();
-
             $.ajax({
                 url: "/KhachHang/DangNhap",
                 type: "GET",
@@ -248,49 +326,41 @@
             });
         });
 
-                       $(document).on("submit", "#formDangKy", function (e) {
+        // ===== Register form submit =====
+        $(document).on("submit", "#formDangKy", function (e) {
             e.preventDefault();
-
             $.ajax({
                 url: "/KhachHang/DangKy",
                 type: "POST",
                 data: $(this).serialize(),
                 success: function (response) {
-                     
-                    
                     if (response.success) {
                         $("#registerModal").modal("hide");
                         showToast("Đăng ký thành công!", "success");
-                    }
-                    else {
-
+                    } else {
                         $("#registerContent").html(response);
                     }
                 }
             });
         });
 
-
-
-                $(document).on("submit", "#formDangNhap", function (e) {
+        // ===== Login form submit =====
+        $(document).on("submit", "#formDangNhap", function (e) {
             e.preventDefault();
-
             $.ajax({
                 url: "/KhachHang/DangNhap",
                 type: "POST",
                 data: $(this).serialize(),
                 success: function (response) {
-                    // Trường hợp thành công
                     if (response.success) {
                         $("#loginModal").modal("hide");
                         window.location.href = response.redirectUrl;
-                    }
-                    else {
+                    } else {
                         $("#loginContent").html(response);
                     }
                 },
-                error: function (){
-                     showToast("Lỗi hệ thống", "danger");
+                error: function () {
+                    showToast("Lỗi hệ thống", "danger");
                 }
             });
         });
